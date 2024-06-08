@@ -28,11 +28,11 @@ logging:
 Chzzk:
   NID_AUT: ct/ExIO7Vzmr/XM5SB4cR2soR0fJBj60W8imf9WUiMoYbtmJVbb0JWjrJWBehAGy
   NID_SES: AAABlpcn3uZTynsfVQ7qWCKp5lceAKg9XdfJZLqvUARj8RqKCbjWBTgcxz71cqCGKPbOzpwkOtgiLKBVOOFOBIq2dLys7GHXbw2kidY8MsSrb+8SVf9PLHUt+Km6rQoreq338n64N+hW1tk0+RZhAITTtkvt8iBP0JVwfhzTbAXOxkB12bgejaIQW3s7VwF2cW+BJVNclnW3d2NTgiXvHmVgK3oxpuVeDd7wY2hm5i0mRQBNpiBXAnb/EqGkw+cMwkUDvDx5Lfa1BsxRRei0EpfI8ztg7ZEouPTa4ZBJwxX4g9Q1I5PM57uJjq5IwESzcBkHTYHjh6evHilb+kYOSZZutHPgSjkX5y27T4GmpxCyLgwtGiWlTDUjLNsWhHLbf1aiqOXI5GnNl7m7CrMEM7ewF5LifuHaTNtmLzWHz25Y5xirZy5WVwnRUMmU8HPVx4Vt7PlHxJNOz0ZG9forrlUZXS1F0LmO2FkeP2jKUa+qjOERQEA0mP0hpidowFpUVKzSZGMdK0nrZQG2vDfFy0PU+8A0hYaD0ahrZbTqQ+iACnh4
-  ChannelName: 순망
-  ChannelId: 448acb33aff5339a08540f0d9e8e2652
+  ChannelName: 칠색딱따구리
+  #ChannelId: 448acb33aff5339a08540f0d9e8e2652
   URL:
     chzzkBaseURL: https://api.chzzk.naver.com/
     gameBaseURL: https://comm-api.game.naver.com/
     naverBaseURL: https://apis.naver.com/
 user:
-  agent: BuzzkLib/1.9.4 (Node)
+  agent: chzzkBot/0.0.1 (Spring-boot)

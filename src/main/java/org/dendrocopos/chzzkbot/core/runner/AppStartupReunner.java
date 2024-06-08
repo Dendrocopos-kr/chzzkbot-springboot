@@ -212,6 +212,12 @@ public class AppStartupReunner implements ApplicationRunner {
                         (gson.fromJson((String)((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("profile"),HashMap.class)).get("nickname")
                         ,((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg")
                 );
+                if( ((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg").toString().charAt(0) == '!'){
+                    log.info("명령어 처리 할 곳");
+                }
+                if( ((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg").toString().startsWith("풉") ){
+                    log.info("기타 명령어 처리할 곳");
+                }
                 break;
             case ChatCmd.DONATION:
                 log.info("DONATION : {}",ChatCmd.DONATION.getValue());
