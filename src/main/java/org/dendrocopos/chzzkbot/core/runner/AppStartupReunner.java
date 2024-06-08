@@ -1,11 +1,11 @@
-package org.dendrocopos.guribot.core.runner;
+package org.dendrocopos.chzzkbot.core.runner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
-import org.dendrocopos.guribot.chzzk.ChatCmd;
-import org.dendrocopos.guribot.chzzk.ChzzkServices;
+import org.dendrocopos.chzzkbot.chzzk.ChatCmd;
+import org.dendrocopos.chzzkbot.chzzk.ChzzkServices;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j

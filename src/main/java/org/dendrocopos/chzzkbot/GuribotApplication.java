@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot;
+package org.dendrocopos.chzzkbot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

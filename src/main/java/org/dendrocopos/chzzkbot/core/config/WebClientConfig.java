@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot.core.config;
+package org.dendrocopos.chzzkbot.core.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

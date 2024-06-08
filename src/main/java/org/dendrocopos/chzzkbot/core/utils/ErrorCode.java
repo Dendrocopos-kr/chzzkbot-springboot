@@ -1,6 +1,5 @@
-package org.dendrocopos.guribot.core.utils;
+package org.dendrocopos.chzzkbot.core.utils;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

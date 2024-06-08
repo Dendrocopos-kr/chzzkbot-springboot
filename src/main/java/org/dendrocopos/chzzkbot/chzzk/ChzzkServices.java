@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot.chzzk;
+package org.dendrocopos.chzzkbot.chzzk;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

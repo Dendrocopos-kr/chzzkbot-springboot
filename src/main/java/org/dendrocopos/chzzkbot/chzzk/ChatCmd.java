@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot.chzzk;
+package org.dendrocopos.chzzkbot.chzzk;
 
 import java.util.Objects;
 

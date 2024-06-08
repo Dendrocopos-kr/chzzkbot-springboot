@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot.core.config;
+package org.dendrocopos.chzzkbot.core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,8 +1,6 @@
-package org.dendrocopos.guribot.core.api;
+package org.dendrocopos.chzzkbot.core.api;
 
-import lombok.Builder;
-import org.dendrocopos.guribot.core.utils.ErrorCode;
-import org.springframework.web.ErrorResponse;
+import org.dendrocopos.chzzkbot.core.utils.ErrorCode;
 
 public class ApiResponse<T> {
     private ApiHeader header;

@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot.core.api;
+package org.dendrocopos.chzzkbot.core.api;
 
 import lombok.Builder;
 import lombok.Getter;

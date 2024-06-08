@@ -1,20 +1,13 @@
-package org.dendrocopos.guribot.core.EntryPoint;
+package org.dendrocopos.chzzkbot.core.EntryPoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dendrocopos.guribot.core.api.ApiResponse;
-import org.dendrocopos.guribot.core.utils.ErrorCode;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.dendrocopos.guribot;
+package org.dendrocopos.chzzkbot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
