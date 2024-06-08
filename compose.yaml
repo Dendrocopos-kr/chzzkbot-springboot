@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres'
+    environment:
+      - 'POSTGRES_DB=guribot'
+      - 'POSTGRES_PASSWORD=guribot'
+      - 'POSTGRES_USER=guribot'
+    ports:
+      - '5432:5432'
