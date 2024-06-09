@@ -225,7 +225,7 @@ public class AppStartupReunner implements ApplicationRunner {
     }
 
     private void sendCommandMessage(WebSocketSession session, String message) {
-        List<String> commands = Arrays.asList("뮤지리","!79행동","뮤냥이","매크로1","사랑해","79");
+        List<String> commands = Arrays.asList("뮤지리","!79행동","뮤냥이","매크로1","사랑해","79","뮤빠","ㄱㄴ?");
 
         if(commands.contains(message) ){
             HashMap<String, Object> extras = new HashMap<>();
@@ -253,6 +253,9 @@ public class AppStartupReunner implements ApplicationRunner {
             /*bdy.put("author", author);*/
 
             switch (message){
+                case "ㄱㄴ?":
+                    bdy.put("msg","지켜보고 있다..!");
+                    break;
                 case "!79행동":
                     bdy.put("msg","이것이 너와 나의 차이다!");
                     break;
@@ -270,6 +273,9 @@ public class AppStartupReunner implements ApplicationRunner {
                 case "79":
                     bdy.put("msg","맞음");
                 break;
+                case "뮤빠":
+                    bdy.put("msg","뮤로나는 다시 돌아온다...");
+                    break;
                 default:
                     bdy.put("msg","그런 명령어는 없는데용?");
             }
