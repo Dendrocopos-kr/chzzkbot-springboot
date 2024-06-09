@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,8 +37,6 @@ public class AppStartupReunner implements ApplicationRunner {
     private final ObjectMapper mapper = new ObjectMapper();
     HashMap<String, Object> openWebSocketJson = new HashMap();
     HashMap<String, Object> bdy = new HashMap();
-    HashMap<String, Object> extras = new HashMap<>();
-    HashMap<String, Object> sendOpt = new HashMap<>();
     private String svcid;
     private String cid;
     private String sid;
@@ -91,17 +90,16 @@ public class AppStartupReunner implements ApplicationRunner {
         /**
          * 채널 accessToken 가져오기
          */
-        String searchTokkenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
-        HashMap searchTokken = gson.fromJson(searchTokkenInfo, HashMap.class);
-        if (searchTokken.get("code").toString().equals("200.0")) {
-            tokenInfo = ((LinkedTreeMap) searchTokken.get("content"));
-            log.info("search tokkenInfo : {}", tokenInfo);
+        String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
+        HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
+        if (searchToken.get("code").toString().equals("200.0")) {
+            tokenInfo = ((LinkedTreeMap) searchToken.get("content"));
+            log.info("search tokenInfo : {}", tokenInfo);
         }
 
         /**
          * 채널ID로 챗 연결
          */
-
 
         openWebSocketJson = new HashMap();
         bdy = new HashMap();
@@ -127,17 +125,8 @@ public class AppStartupReunner implements ApplicationRunner {
         pongCmd.put("ver", "2");
 
         websocketclient.execute(
-                        URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"),
-                session -> /*session.send(Mono.just(session.textMessage(message)))
-                        .thenMany(
-                                Flux.interval(Duration.ofSeconds(20)) // Interval setup
-                                        .flatMap(time -> session.send(Mono.just(session.textMessage(gson.toJson(pongCmd))))) // Message sending every 20 seconds
-                        ).then()
-                        .thenMany(
-                                session.receive()
-                                        .map(WebSocketMessage::getPayloadAsText)
-                                        .doOnNext(s -> processReceivedMessage(session,s))
-                        ).then()*/
+                URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"),
+                session ->
                         Flux.merge(
                                 // Periodic message sending every 20 seconds
                                 session.send(Mono.just(session.textMessage(message))) // Initial message after connection setup
@@ -149,102 +138,155 @@ public class AppStartupReunner implements ApplicationRunner {
                                 // Handling received messages from server
                                 session.receive() // Handling received messages similar to original code
                                         .map(WebSocketMessage::getPayloadAsText)
-                                        .doOnNext(s -> processReceivedMessage(session,s))
+                                        .doOnNext(s -> processReceivedMessage(session, s))
                         ).then()
         ).subscribe(null, null, () -> {
             log.info("종료시 실행할 곳");
-            /*processSendMessage(gson.toJson(openWebSocketJson));*/
         });
     }
 
     public void processReceivedMessage(WebSocketSession session, String receivedMessage) {
         log.info("Received WebSocket message: {}", receivedMessage);
-/*
-        if (data.cid) this.#chatID = data.cid;
-        if (data.svcid) this.#svcid = data.svcid;
-        if (data.bdy && data.bdy.sid) this.#sid = data.bdy.sid;
-        */
 
         HashMap messageInfo = gson.fromJson(receivedMessage, HashMap.class);
         int cmd = Integer.parseInt(messageInfo.get("cmd").toString().split("\\.")[0]);
 
-        if(messageInfo.get("svcid") != null)
-        {
+        if (messageInfo.get("svcid") != null) {
             svcid = messageInfo.get("svcid").toString();
         }
-        if(messageInfo.get("cid") != null)
-        {
+        if (messageInfo.get("cid") != null) {
             cid = messageInfo.get("cid").toString();
         }
-        if(messageInfo.get("bdy") != null && messageInfo.get("bdy") instanceof LinkedTreeMap && ((LinkedTreeMap)messageInfo.get("bdy")).get("sid") != null)
-        {
-            sid = ((LinkedTreeMap)messageInfo.get("bdy")).get("sid").toString();
+        if (messageInfo.get("bdy") != null && messageInfo.get("bdy") instanceof LinkedTreeMap && ((LinkedTreeMap) messageInfo.get("bdy")).get("sid") != null) {
+            sid = ((LinkedTreeMap) messageInfo.get("bdy")).get("sid").toString();
         }
-        switch (ChatCmd.getCommand(cmd)){
+
+        switch (ChatCmd.getCommand(cmd)) {
             case ChatCmd.PING:
-                log.info("PING : {}",ChatCmd.PING.getValue());
+                //log.info("PING : {}", ChatCmd.PING.getValue());
                 break;
             case ChatCmd.PONG:
-                log.info("PONG : {}",ChatCmd.PONG.getValue());
+                //log.info("PONG : {}", ChatCmd.PONG.getValue());
                 break;
             case ChatCmd.CONNECT:
-                log.info("CONNECT : {}",ChatCmd.CONNECT.getValue());
+                //log.info("CONNECT : {}", ChatCmd.CONNECT.getValue());
                 break;
             case ChatCmd.CONNECTED:
-                log.info("CONNECTED : {}",ChatCmd.CONNECTED.getValue());
-                bdy.put("sid", ((LinkedTreeMap)messageInfo.get("bdy")).get("sid"));
+                //log.info("CONNECTED : {}", ChatCmd.CONNECTED.getValue());
+                bdy.put("sid", ((LinkedTreeMap) messageInfo.get("bdy")).get("sid"));
                 openWebSocketJson.put("bdy", bdy);
-                log.info("openWebSocketJson : {}",openWebSocketJson);
+                //log.info("openWebSocketJson : {}", openWebSocketJson);
                 session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
                 break;
             case ChatCmd.REQUEST_RECENT_CHAT:
-                log.info("REQUEST_RECENT_CHAT : {}",ChatCmd.REQUEST_RECENT_CHAT.getValue());
+                //log.info("REQUEST_RECENT_CHAT : {}", ChatCmd.REQUEST_RECENT_CHAT.getValue());
                 break;
             case ChatCmd.RECENT_CHAT:
-                log.info("RECENT_CHAT : {}",ChatCmd.RECENT_CHAT.getValue());
+                //log.info("RECENT_CHAT : {}", ChatCmd.RECENT_CHAT.getValue());
                 break;
             case ChatCmd.EVENT:
-                log.info("EVENT : {}",ChatCmd.EVENT.getValue());
+                //log.info("EVENT : {}", ChatCmd.EVENT.getValue());
                 break;
             case ChatCmd.CHAT:
-                log.info("CHAT : {}",ChatCmd.CHAT.getValue());
+                //log.info("CHAT : {}", ChatCmd.CHAT.getValue());
                 log.info("{} : {}",
-                        (gson.fromJson((String)((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("profile"),HashMap.class)).get("nickname")
-                        ,((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg")
+                        (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
+                        , ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg")
                 );
-                if( ((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg").toString().charAt(0) == '!'){
-                    log.info("명령어 처리 할 곳");
-                }
-                if( ((LinkedTreeMap)((ArrayList)messageInfo.get("bdy")).get(0)).get("msg").toString().startsWith("풉") ){
-                    log.info("기타 명령어 처리할 곳");
-                }
+                sendCommandMessage(session,((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString().split(" ")[0]);
+
                 break;
             case ChatCmd.DONATION:
-                log.info("DONATION : {}",ChatCmd.DONATION.getValue());
+                //log.info("DONATION : {}", ChatCmd.DONATION.getValue());
                 break;
             case ChatCmd.KICK:
-                log.info("KICK : {}",ChatCmd.KICK.getValue());
+                //log.info("KICK : {}", ChatCmd.KICK.getValue());
                 break;
             case ChatCmd.BLOCK:
-                log.info("BLOCK : {}",ChatCmd.BLOCK.getValue());
+                //log.info("BLOCK : {}", ChatCmd.BLOCK.getValue());
                 break;
             case ChatCmd.BLIND:
-                log.info("BLIND : {}",ChatCmd.BLIND.getValue());
+                //log.info("BLIND : {}", ChatCmd.BLIND.getValue());
                 break;
             case ChatCmd.NOTICE:
-                log.info("NOTICE : {}",ChatCmd.NOTICE.getValue());
+                //log.info("NOTICE : {}", ChatCmd.NOTICE.getValue());
                 break;
             case ChatCmd.PENALTY:
-                log.info("PENALTY : {}",ChatCmd.PENALTY.getValue());
+                //log.info("PENALTY : {}", ChatCmd.PENALTY.getValue());
                 break;
             case ChatCmd.SEND_CHAT:
-                log.info("SEND_CHAT : {}",ChatCmd.SEND_CHAT.getValue());
+                //log.info("SEND_CHAT : {}", ChatCmd.SEND_CHAT.getValue());
                 break;
             default:
-                log.info("Unknown command : {}",ChatCmd.getCommand(cmd));
+                log.info("Unknown command : {}", ChatCmd.getCommand(cmd));
                 break;
         }
 
+    }
+
+    private void sendCommandMessage(WebSocketSession session, String message) {
+        List<String> commands = Arrays.asList("뮤지리","!79행동","뮤냥이","매크로1","사랑해","79");
+
+        if(commands.contains(message) ){
+            HashMap<String, Object> extras = new HashMap<>();
+            HashMap<String, Object> sendOptions = new HashMap<>();
+            HashMap<String, Object> bdy = new HashMap<>();
+            HashMap<String, Object> author = new HashMap<>();
+
+            extras.put("chatType", "STREAMING");
+            extras.put("emojis", "");
+            extras.put("osType", "PC");
+            extras.put("extraToken", tokenInfo.get("extraToken"));
+            extras.put("streamingChannelId", channelInfo.get("channelId"));
+/*
+
+            author.put("uid","448acb33aff5339a08540f0d9e8e2652"); // 봇계정 uid 필요함
+            author.put("name","");
+            author.put("imageURL","");
+            author.put("hasMod",true); // 메세지 전송자 streamer||streaming_channel_manager||streaming_chat_manager 확인
+*/
+
+            bdy.put("msgTypeCode", 1);
+            bdy.put("extras", gson.toJson(extras));
+            //bdy.put("accTkn", tokenInfo.get("accessToken"));
+            bdy.put("msgTime", System.currentTimeMillis());
+            /*bdy.put("author", author);*/
+
+            switch (message){
+                case "!79행동":
+                    bdy.put("msg","이것이 너와 나의 차이다!");
+                    break;
+                case "매크로1":
+                    bdy.put("msg","오늘 뭐 했어요?");
+                    break;
+                case "뮤지리":
+                    bdy.put("msg","뮤로나는 모자르지 않아요!");
+                    break;
+                case "뮤냥이":
+                    break;
+                case "사랑해":
+                    bdy.put("msg","나도 사랑해요!");
+                    break;
+                case "79":
+                    bdy.put("msg","맞음");
+                break;
+                default:
+                    bdy.put("msg","그런 명령어는 없는데용?");
+            }
+
+            sendOptions.put("ver", "2");
+            sendOptions.put("svcid", svcid);
+            sendOptions.put("cid", cid);
+            sendOptions.put("tid", 3);
+            sendOptions.put("cmd", ChatCmd.SEND_CHAT.getValue());
+            sendOptions.put("retry", false);
+            sendOptions.put("sid", sid);
+            sendOptions.put("bdy", bdy);
+
+            log.info("sendOptions : {}",gson.toJson(sendOptions));
+
+            session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+        }
     }
 
     private void processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
