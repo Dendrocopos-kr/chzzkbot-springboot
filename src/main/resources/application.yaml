@@ -1,6 +1,6 @@
 spring:
   application:
-    name: guribot
+    name: chzzkbot
     version: 0.0.1
   jpa:
     hibernate:
@@ -26,9 +26,9 @@ logging:
     org.springframework.web.socket: trace
 
 Chzzk:
-  NID_AUT: ct/ExIO7Vzmr/XM5SB4cR2soR0fJBj60W8imf9WUiMoYbtmJVbb0JWjrJWBehAGy
-  NID_SES: AAABlpcn3uZTynsfVQ7qWCKp5lceAKg9XdfJZLqvUARj8RqKCbjWBTgcxz71cqCGKPbOzpwkOtgiLKBVOOFOBIq2dLys7GHXbw2kidY8MsSrb+8SVf9PLHUt+Km6rQoreq338n64N+hW1tk0+RZhAITTtkvt8iBP0JVwfhzTbAXOxkB12bgejaIQW3s7VwF2cW+BJVNclnW3d2NTgiXvHmVgK3oxpuVeDd7wY2hm5i0mRQBNpiBXAnb/EqGkw+cMwkUDvDx5Lfa1BsxRRei0EpfI8ztg7ZEouPTa4ZBJwxX4g9Q1I5PM57uJjq5IwESzcBkHTYHjh6evHilb+kYOSZZutHPgSjkX5y27T4GmpxCyLgwtGiWlTDUjLNsWhHLbf1aiqOXI5GnNl7m7CrMEM7ewF5LifuHaTNtmLzWHz25Y5xirZy5WVwnRUMmU8HPVx4Vt7PlHxJNOz0ZG9forrlUZXS1F0LmO2FkeP2jKUa+qjOERQEA0mP0hpidowFpUVKzSZGMdK0nrZQG2vDfFy0PU+8A0hYaD0ahrZbTqQ+iACnh4
-  ChannelName: 칠색딱따구리
+  NID_AUT: QgT35YgPxLQimeu+e0vJEHpqQnaeLZBoqVhs6mzj7xbgplpH8ITCofxqJqQCDBEB
+  NID_SES: AAABhNAfuKDIWGR76QjfEb1xGeIK5XQuWutHi+uonzPvSb55R9kI1cOsp8CrkvekkGs5o0eKb5mAPy0g+slhdddSMKxsz3JMWufxTgjb4DR6ZObzdx0l79J2y+G7wbWIhe3UVJuKO3cQTxG79xVilVZ9rimuvadVNinOaPzbSPZv6UpiGo2vzrv5ajoHY1I6JB/0Rz6jYBbvKGkW4vX/5bpdZRaEQfUmvmYhBOlqTwHrafzLLK/Yc0i9ZP0aHf6ma7tGM3BqeKczNb2fJ4Q/qD9+TAguJ51MYZ0R+2g6i/WdwmP883gQv9I5QdusB1VAz2XXnd04bjkgOKv8taT+/p+HWmR9t8u30CsCogVn5oKkTA1dT9Oy6/2YcuQU7vY+I+b/cVRxOoI4k8b8nXrQrwcU5v+lIq1neIvN10IAHDY+fDG58klpIWntmHY4Yjo0cIHQ0VG7he4BVZBreLtrYZqEZ85NyM53gDX2VVFr0RzO0N02J6YsTQ8HtTGLYaxN72Ynzk/K4oOek0ZeGQ4rrDWWJ9I=
+  ChannelName: 뮤로나
   #ChannelId: 448acb33aff5339a08540f0d9e8e2652
   URL:
     chzzkBaseURL: https://api.chzzk.naver.com/
