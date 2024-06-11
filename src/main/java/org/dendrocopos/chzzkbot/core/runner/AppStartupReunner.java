@@ -67,7 +67,7 @@ public class AppStartupReunner implements ApplicationRunner {
         log.info("channelSearch : {}", searchChannelInfo);
 
         HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
-        processChannelSearch(searchChannelData);
+        channelInfo = processChannelSearch(searchChannelData);
 
         /**
          * UID 가져오기
@@ -318,7 +318,7 @@ public class AppStartupReunner implements ApplicationRunner {
         }
     }
 
-    private void processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
+    private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
         for (String key : searchChannelData.keySet()) {
             if (CONTENT.equals(key)) {
                 LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>> content = searchChannelData.get(CONTENT);
@@ -327,11 +327,12 @@ public class AppStartupReunner implements ApplicationRunner {
                     if (DATA.equals(contentKey)) {
                         List<LinkedTreeMap<String, Object>> dataList = content.get(DATA);
                         LinkedTreeMap<String, Object> channelInfo = dataList.get(0);
-                        this.channelInfo = (LinkedTreeMap<String, Object>) channelInfo.get("channel");
                         log.info("search channelInfo : {}", channelInfo);
+                        return (LinkedTreeMap<String, Object>) channelInfo.get("channel");
                     }
                 }
             }
         }
+        return null;
     }
 }
