@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.yourapp.mapper.AuthorMapper">
     <select id="selectCommandMessage01" parameterType="java.lang.String"
-            resultType="org.dendrocopos.chzzkbot.core.message.vo.MessageVO">
+            resultType="messageVO">
         select * from command_message
     </select>
 </mapper>

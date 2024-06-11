@@ -23,6 +23,7 @@ public class MybatisConfig {
         sessionFactory.setDataSource(dataSource);
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         sessionFactory.setMapperLocations(resolver.getResources("classpath:mapper/*.xml"));
+        sessionFactory.setTypeAliasesPackage("org.dendrocopos.chzzkbot.*.vo");
         return sessionFactory.getObject();
     }
 
