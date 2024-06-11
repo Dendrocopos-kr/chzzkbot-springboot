@@ -32,7 +32,7 @@ public class AppStartupReunner implements ApplicationRunner {
     private static final String DATA = "data";
     private final ChzzkServices chzzkServices;
     private final Gson gson;
-    //private final MessageSVC messageSVC;
+    private final MessageSVC messageSVC;
     private LinkedTreeMap channelInfo;
     private LinkedTreeMap chatChannelInfo;
     private LinkedTreeMap tokenInfo;
@@ -49,9 +49,9 @@ public class AppStartupReunner implements ApplicationRunner {
     @Value("${Chzzk.ChannelName}")
     private String channelName;
 
-    public AppStartupReunner(ChzzkServices chzzkServices, /*MessageSVC messageSVC,*/ WebSocketClient websocketclient) {
+    public AppStartupReunner(ChzzkServices chzzkServices, MessageSVC messageSVC, WebSocketClient websocketclient) {
         this.chzzkServices = chzzkServices;
-        //this.messageSVC = messageSVC;
+        this.messageSVC = messageSVC;
         this.websocketclient = websocketclient;
         this.gson = new Gson();
     }

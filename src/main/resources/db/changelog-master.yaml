@@ -1,0 +1,29 @@
+# YAML
+databaseChangeLog:
+  - changeSet:
+      id: create-table-example
+      author: yourauthorname
+      changes:
+        - createTable:
+            tableName: yourTableName
+            remarks: "Your Table Description"
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: author
+                  type: VARCHAR(256)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_date
+                  type: TIMESTAMP

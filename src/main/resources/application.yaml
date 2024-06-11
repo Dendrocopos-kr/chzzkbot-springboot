@@ -1,16 +1,22 @@
 spring:
   liquibase:
-    change-log: classpath:db/changelog/db-changelog.yml
+    change-log: classpath:db/changelog/db-changelog-master.yaml
   application:
     name: chzzkbot
     version: 0.0.1
   jpa:
     hibernate:
       ddl-auto: update
+    database: POSTGRESQL
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
     url: jdbc:postgresql://localhost:5432/guribot
     username: guribot
     password: guribot
+    driver-class-name: org.postgresql.Driver
   session:
     jdbc:
       initialize-schema: always
@@ -26,7 +32,6 @@ logging:
   level:
     org.springframework.messaging: trace
     org.springframework.web.socket: trace
-
 Chzzk:
   NID_AUT: pAw0ywM4695bUa+qqaSGbcqA9JOPDJaeOULYkcOuQTerI63laYiFwJmaHITG8ux6
   NID_SES: AAABi9FE3Q+BNSgxARJhpyOTdmZHGYmnU9wIB+StpVdesKiitAbw4gamm3NAtyM3O9FEwzCQdIFMPzvJw9b3LxN4RB3DkHF+1qiC23ItL1CTrMujMWYUe6F4sa1QfUFLL5FI5nfEDUzx+kzXQ2IYQmoP13MNE/yj3UzIh1iWYgvNzXBvQmRNCo3cPGYmB6J6aaB2TC7vDxErmHlj20AUAT0z+jPOiDk0T6kn8Cfsi3Vz1uyZMxQX7Wd+QzSSFoOdQ08JnGZRGXOK8A4IabJlnOI9y58hdnF2OG1opFTWSh1RVRyvU3dsqvQZueN29gaoDNR8E8HvItjGfBgapomdi1JBoPlc740FITkEk/VthnxNgGNO6221yo7LAAblyQPue3VvQxYEgNMu5okgqtjgLE/waF8bpMcs0aID+3yUceoEr+sMLHm+EXVEQX5V4rHApOYoLMLkwAsqkuvxfR6jZTI6fsVtEKopahmW2zeXtDk7aka87q4ac6/4L8f+Rl0aj6Lkw6PehftNuAgiwZC9/wuboQ4=
