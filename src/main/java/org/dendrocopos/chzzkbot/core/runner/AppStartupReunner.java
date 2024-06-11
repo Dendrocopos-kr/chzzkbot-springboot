@@ -6,10 +6,12 @@ import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.dendrocopos.chzzkbot.chzzk.ChatCmd;
 import org.dendrocopos.chzzkbot.chzzk.ChzzkServices;
+import org.dendrocopos.chzzkbot.core.message.services.MessageSVC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -30,6 +32,7 @@ public class AppStartupReunner implements ApplicationRunner {
     private static final String DATA = "data";
     private final ChzzkServices chzzkServices;
     private final Gson gson;
+    //private final MessageSVC messageSVC;
     private LinkedTreeMap channelInfo;
     private LinkedTreeMap chatChannelInfo;
     private LinkedTreeMap tokenInfo;
@@ -46,8 +49,9 @@ public class AppStartupReunner implements ApplicationRunner {
     @Value("${Chzzk.ChannelName}")
     private String channelName;
 
-    public AppStartupReunner(ChzzkServices chzzkServices, WebSocketClient websocketclient) {
+    public AppStartupReunner(ChzzkServices chzzkServices, /*MessageSVC messageSVC,*/ WebSocketClient websocketclient) {
         this.chzzkServices = chzzkServices;
+        //this.messageSVC = messageSVC;
         this.websocketclient = websocketclient;
         this.gson = new Gson();
     }
@@ -119,7 +123,8 @@ public class AppStartupReunner implements ApplicationRunner {
 
     public void processSendMessage(String message) {
 
-        int serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars().reduce(0, Integer::sum)) % 9 + 1;
+        int serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
+                .reduce(0, Integer::sum)) % 9 + 1;
         HashMap pongCmd = new HashMap();
         pongCmd.put("cmd", ChatCmd.PONG.getValue());
         pongCmd.put("ver", "2");
@@ -225,7 +230,10 @@ public class AppStartupReunner implements ApplicationRunner {
     }
 
     private void sendCommandMessage(WebSocketSession session, String message) {
-        List<String> commands = Arrays.asList("뮤지리","!79행동","뮤냥이","매크로1","사랑해","79","뮤빠","ㄱㄴ?");
+        List<String> commands = Arrays.asList(
+                "뮤지리","!79행동","뮤냥이","매크로1","매크로2"
+                ,"사랑해","79","뮤빠","ㄱㄴ?","거짓말","뮤쪽이","눈나!!!"
+        );
 
         if(commands.contains(message) ){
             HashMap<String, Object> extras = new HashMap<>();
@@ -239,7 +247,6 @@ public class AppStartupReunner implements ApplicationRunner {
             extras.put("extraToken", tokenInfo.get("extraToken"));
             extras.put("streamingChannelId", channelInfo.get("channelId"));
 /*
-
             author.put("uid","448acb33aff5339a08540f0d9e8e2652"); // 봇계정 uid 필요함
             author.put("name","");
             author.put("imageURL","");
@@ -252,18 +259,33 @@ public class AppStartupReunner implements ApplicationRunner {
             bdy.put("msgTime", System.currentTimeMillis());
             /*bdy.put("author", author);*/
 
+            //bdy.put("msg",messageSVC.selectCommandMessage01(message));
+/*
+
             switch (message){
+                case "눈나!!!":
+                    bdy.put("msg","헤으응~");
+                    break;
+                case "거짓말":
+                    bdy.put("msg","저 나디아 봇은 거짓말을 하고 있어요!");
+                    break;
+                case "뮤쪽이":
+                    bdy.put("msg","응~! 나 뮤쪽인데 어쩔~");
+                    break;
                 case "ㄱㄴ?":
                     bdy.put("msg","지켜보고 있다..!");
                     break;
                 case "!79행동":
-                    bdy.put("msg","이것이 너와 나의 차이다!");
+                    bdy.put("msg","우끾끾!!");
                     break;
                 case "매크로1":
                     bdy.put("msg","오늘 뭐 했어요?");
                     break;
+                case "매크로2":
+                    bdy.put("msg","오늘 뭐 먹었어요?");
+                    break;
                 case "뮤지리":
-                    bdy.put("msg","뮤로나는 모자르지 않아요!");
+                    bdy.put("msg","뮤로나는 모잘라요! 내가 진짜임!");
                     break;
                 case "뮤냥이":
                     break;
@@ -274,11 +296,12 @@ public class AppStartupReunner implements ApplicationRunner {
                     bdy.put("msg","맞음");
                 break;
                 case "뮤빠":
-                    bdy.put("msg","뮤로나는 다시 돌아온다...");
+                    bdy.put("msg","가버렷!!");
                     break;
                 default:
                     bdy.put("msg","그런 명령어는 없는데용?");
             }
+*/
 
             sendOptions.put("ver", "2");
             sendOptions.put("svcid", svcid);
