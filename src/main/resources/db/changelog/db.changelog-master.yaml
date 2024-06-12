@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: init
+      author: guribot
+
+  #ddl
+  - includeAll:
+      path: ddl/commandMessage
+      relativeToChangeLogFile: true
+
+  #dml
+  - includeAll:
+      path: dml/commandMessage
+      relativeToChangeLogFile: true

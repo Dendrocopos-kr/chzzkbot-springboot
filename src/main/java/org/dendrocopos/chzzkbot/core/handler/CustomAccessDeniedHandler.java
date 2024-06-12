@@ -17,9 +17,11 @@ import java.io.IOException;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     private final HandlerExceptionResolver handlerExceptionResolver;
 
+
     public CustomAccessDeniedHandler(HandlerExceptionResolver handlerExceptionResolver) {
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
+
 
     //private final ObjectMapper objectMapper;
 

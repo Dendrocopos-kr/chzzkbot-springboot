@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.chzzk;
+package org.dendrocopos.chzzkbot.chzzk.chatservice;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +29,7 @@ public class ChzzkServices {
 
     public Mono<String> reqChzzk(String path) {
         return webClient.get()
-                .uri( chzzkBaseURL + path)
+                .uri(chzzkBaseURL + path)
                 .accept(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.COOKIE, "NID_AUT=" + nidAut + ";NID_SES=" + nidSes)
                 .header(HttpHeaders.USER_AGENT, "guribot/" + applicationVersion + " (SpringBoot)")
@@ -41,9 +41,9 @@ public class ChzzkServices {
         return reqChzzk(path);
     }
 
-    public Mono<String> reqGame(String path){
+    public Mono<String> reqGame(String path) {
         return webClient.get()
-                .uri( gameBaseURL + path)
+                .uri(gameBaseURL + path)
                 .accept(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.COOKIE, "NID_AUT=" + nidAut + ";NID_SES=" + nidSes)
                 .retrieve()

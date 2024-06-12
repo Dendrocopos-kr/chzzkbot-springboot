@@ -1,17 +1,18 @@
-package org.dendrocopos.chzzkbot.core.runner;
+package org.dendrocopos.chzzkbot.chzzk.main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dendrocopos.chzzkbot.chzzk.ChatCmd;
-import org.dendrocopos.chzzkbot.chzzk.ChzzkServices;
-import org.dendrocopos.chzzkbot.core.message.services.MessageSVC;
+import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.chatenum.ChatCmd;
+import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
+import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -21,43 +22,35 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
-@Component
 @Slf4j
-public class AppStartupReunner implements ApplicationRunner {
+@Component
+@RequiredArgsConstructor
+public class ChatMain {
     private static final String CONTENT = "content";
     private static final String DATA = "data";
     private final ChzzkServices chzzkServices;
-    private final Gson gson;
-    private final MessageSVC messageSVC;
+    private final Gson gson = new Gson();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final WebSocketClient websocketclient;
+    private final CommandMessageRepository messageRepository;
+    HashMap<String, Object> openWebSocketJson = new HashMap();
+    HashMap<String, Object> bdy = new HashMap();
     private LinkedTreeMap channelInfo;
     private LinkedTreeMap chatChannelInfo;
     private LinkedTreeMap tokenInfo;
     private LinkedTreeMap myInfo;
-    private final ObjectMapper mapper = new ObjectMapper();
-    HashMap<String, Object> openWebSocketJson = new HashMap();
-    HashMap<String, Object> bdy = new HashMap();
     private String svcid;
     private String cid;
     private String sid;
-
-    private WebSocketClient websocketclient;
-
     @Value("${Chzzk.ChannelName}")
     private String channelName;
 
-    public AppStartupReunner(ChzzkServices chzzkServices, MessageSVC messageSVC, WebSocketClient websocketclient) {
-        this.chzzkServices = chzzkServices;
-        this.messageSVC = messageSVC;
-        this.websocketclient = websocketclient;
-        this.gson = new Gson();
-    }
-
-    @Override
-    public void run(ApplicationArguments args) {
+    @EventListener(ApplicationReadyEvent.class)
+    public void startWebSocket() {
 
         /**
          * 채널 검색
@@ -120,6 +113,7 @@ public class AppStartupReunner implements ApplicationRunner {
 
         processSendMessage(gson.toJson(openWebSocketJson));
     }
+
 
     public void processSendMessage(String message) {
 
@@ -198,7 +192,7 @@ public class AppStartupReunner implements ApplicationRunner {
                         (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
                         , ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg")
                 );
-                sendCommandMessage(session,((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString().split(" ")[0]);
+                sendCommandMessage(session, (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString(), ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString().split(" ")[0]);
 
                 break;
             case ChatCmd.DONATION:
@@ -229,13 +223,9 @@ public class AppStartupReunner implements ApplicationRunner {
 
     }
 
-    private void sendCommandMessage(WebSocketSession session, String message) {
-        List<String> commands = Arrays.asList(
-                "뮤지리","!79행동","뮤냥이","매크로1","매크로2"
-                ,"사랑해","79","뮤빠","ㄱㄴ?","거짓말","뮤쪽이","눈나!!!"
-        );
-
-        if(commands.contains(message) ){
+    private void sendCommandMessage(WebSocketSession session, String nickName, String message) {
+        List<CommandMessageEntity> commandList = messageRepository.findAll();
+        if (commandList.contains(message)) {
             HashMap<String, Object> extras = new HashMap<>();
             HashMap<String, Object> sendOptions = new HashMap<>();
             HashMap<String, Object> bdy = new HashMap<>();
@@ -258,50 +248,52 @@ public class AppStartupReunner implements ApplicationRunner {
             //bdy.put("accTkn", tokenInfo.get("accessToken"));
             bdy.put("msgTime", System.currentTimeMillis());
             /*bdy.put("author", author);*/
+            Optional<CommandMessageEntity> cmdMsg = messageRepository.findById(message);
+            bdy.put("msg", cmdMsg);
 
-            //bdy.put("msg",messageSVC.selectCommandMessage01(message));
 /*
 
-            switch (message){
+            switch (message) {
                 case "눈나!!!":
-                    bdy.put("msg","헤으응~");
+                    bdy.put("msg", "헤으응~");
                     break;
                 case "거짓말":
-                    bdy.put("msg","저 나디아 봇은 거짓말을 하고 있어요!");
+                    bdy.put("msg", "저 나디아 봇은 거짓말을 하고 있어요!");
                     break;
                 case "뮤쪽이":
-                    bdy.put("msg","응~! 나 뮤쪽인데 어쩔~");
+                    bdy.put("msg", "응~! 나 뮤쪽인데 어쩔~");
                     break;
                 case "ㄱㄴ?":
-                    bdy.put("msg","지켜보고 있다..!");
+                    bdy.put("msg", "지켜보고 있다..!");
                     break;
                 case "!79행동":
-                    bdy.put("msg","우끾끾!!");
+                    bdy.put("msg", "우끾끾!!");
                     break;
                 case "매크로1":
-                    bdy.put("msg","오늘 뭐 했어요?");
+                    bdy.put("msg", "오늘 뭐 했어요?");
                     break;
                 case "매크로2":
-                    bdy.put("msg","오늘 뭐 먹었어요?");
+                    bdy.put("msg", "오늘 뭐 먹었어요?");
                     break;
                 case "뮤지리":
-                    bdy.put("msg","뮤로나는 모잘라요! 내가 진짜임!");
+                    bdy.put("msg", "뮤로나는 모잘라요! 내가 진짜임!");
                     break;
                 case "뮤냥이":
                     break;
                 case "사랑해":
-                    bdy.put("msg","나도 사랑해요!");
+                    bdy.put("msg", "나도 사랑해요!");
                     break;
                 case "79":
-                    bdy.put("msg","맞음");
-                break;
+                    bdy.put("msg", "맞음");
+                    break;
                 case "뮤빠":
-                    bdy.put("msg","가버렷!!");
+                    bdy.put("msg", nickName + "님 잘가요!");
                     break;
                 default:
-                    bdy.put("msg","그런 명령어는 없는데용?");
+                    bdy.put("msg", "그런 명령어는 없는데용?");
             }
 */
+
 
             sendOptions.put("ver", "2");
             sendOptions.put("svcid", svcid);
@@ -312,7 +304,7 @@ public class AppStartupReunner implements ApplicationRunner {
             sendOptions.put("sid", sid);
             sendOptions.put("bdy", bdy);
 
-            log.info("sendOptions : {}",gson.toJson(sendOptions));
+            log.info("sendOptions : {}", gson.toJson(sendOptions));
 
             session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
         }
@@ -335,4 +327,5 @@ public class AppStartupReunner implements ApplicationRunner {
         }
         return null;
     }
+
 }
