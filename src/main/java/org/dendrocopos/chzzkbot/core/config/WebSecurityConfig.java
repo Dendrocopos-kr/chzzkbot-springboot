@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,12 +19,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
-public class WebSecurityConfig{
+public class WebSecurityConfig {
 
-    @Value("${security.allowed-uris}")
-    private String[] allowedUris;
     private final AuthenticationEntryPoint authenticationEntryPoint;
     private final AccessDeniedHandler accessDeniedHandler;
+    @Value("${security.allowed-uris}")
+    private String[] allowedUris;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,9 +35,7 @@ public class WebSecurityConfig{
                         .requestMatchers(allowedUris).permitAll()
                         .anyRequest().permitAll()
                 )
-                .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
-                        .loginPage("/login")
-                        .permitAll()
+                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll
                 )
                 .logout(LogoutConfigurer::permitAll)
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer

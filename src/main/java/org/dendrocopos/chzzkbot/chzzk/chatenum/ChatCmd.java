@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.chzzk;
+package org.dendrocopos.chzzkbot.chzzk.chatenum;
 
 import java.util.Objects;
 
@@ -25,16 +25,16 @@ public enum ChatCmd {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
-
     public static Object getCommand(int value) {
-        for (ChatCmd cmd: values()) {
+        for (ChatCmd cmd : values()) {
             if (Objects.equals(cmd.value, value)) {
                 return cmd;
             }
         }
+        return value;
+    }
+
+    public int getValue() {
         return value;
     }
 
