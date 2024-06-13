@@ -1,7 +1,4 @@
 spring:
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
   application:
     name: chzzkbot
     version: 0.0.1
@@ -10,10 +7,9 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
     open-in-view: true
@@ -22,11 +18,6 @@ spring:
     username: guribot
     password: guribot
     driver-class-name: org.postgresql.Driver
-    hikari:
-      jdbc-url: ${spring.datasource.url}
-      driver-class-name: ${spring.datasource.driver-class-name}
-      username: ${spring.datasource.username}
-      password: ${spring.datasource.password}
   session:
     jdbc:
       initialize-schema: always
@@ -34,6 +25,14 @@ spring:
     user:
       name: guribot
       password: guribot
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    driver-class-name: ${spring.datasource.driver-class-name}
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    clear-checksums: false
 server:
   port: 8080
 security:
@@ -42,8 +41,8 @@ logging:
   level:
     org.springframework.messaging: debug
     org.springframework.web.socket: debug
-    liqubase: debug
-Chzzk:
+    liquibase: debug
+chzzk:
   NID_AUT: pAw0ywM4695bUa+qqaSGbcqA9JOPDJaeOULYkcOuQTerI63laYiFwJmaHITG8ux6
   NID_SES: AAABi9FE3Q+BNSgxARJhpyOTdmZHGYmnU9wIB+StpVdesKiitAbw4gamm3NAtyM3O9FEwzCQdIFMPzvJw9b3LxN4RB3DkHF+1qiC23ItL1CTrMujMWYUe6F4sa1QfUFLL5FI5nfEDUzx+kzXQ2IYQmoP13MNE/yj3UzIh1iWYgvNzXBvQmRNCo3cPGYmB6J6aaB2TC7vDxErmHlj20AUAT0z+jPOiDk0T6kn8Cfsi3Vz1uyZMxQX7Wd+QzSSFoOdQ08JnGZRGXOK8A4IabJlnOI9y58hdnF2OG1opFTWSh1RVRyvU3dsqvQZueN29gaoDNR8E8HvItjGfBgapomdi1JBoPlc740FITkEk/VthnxNgGNO6221yo7LAAblyQPue3VvQxYEgNMu5okgqtjgLE/waF8bpMcs0aID+3yUceoEr+sMLHm+EXVEQX5V4rHApOYoLMLkwAsqkuvxfR6jZTI6fsVtEKopahmW2zeXtDk7aka87q4ac6/4L8f+Rl0aj6Lkw6PehftNuAgiwZC9/wuboQ4=
   ChannelName: 뮤로나

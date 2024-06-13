@@ -24,7 +24,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -46,7 +45,7 @@ public class ChatMain {
     private String svcid;
     private String cid;
     private String sid;
-    @Value("${Chzzk.ChannelName}")
+    @Value("${chzzk.ChannelName}")
     private String channelName;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -225,7 +224,9 @@ public class ChatMain {
 
     private void sendCommandMessage(WebSocketSession session, String nickName, String message) {
         List<CommandMessageEntity> commandList = messageRepository.findAll();
-        if (commandList.contains(message)) {
+
+        //if (commandList.contains(message)) {
+        if (commandList.stream().anyMatch(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))) {
             HashMap<String, Object> extras = new HashMap<>();
             HashMap<String, Object> sendOptions = new HashMap<>();
             HashMap<String, Object> bdy = new HashMap<>();
@@ -248,8 +249,23 @@ public class ChatMain {
             //bdy.put("accTkn", tokenInfo.get("accessToken"));
             bdy.put("msgTime", System.currentTimeMillis());
             /*bdy.put("author", author);*/
-            Optional<CommandMessageEntity> cmdMsg = messageRepository.findById(message);
-            bdy.put("msg", cmdMsg);
+            if (commandList.stream()
+                    .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
+                    .findFirst().get().isNickNameUse()
+            ) {
+                bdy.put("msg", nickName +
+                        "님 " +
+                        commandList.stream()
+                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
+                                .findFirst().get().getCmdMsg()
+                );
+            } else {
+                bdy.put("msg",
+                        commandList.stream()
+                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
+                                .findFirst().get().getCmdMsg()
+                );
+            }
 
 /*
 

@@ -12,13 +12,13 @@ public class ChzzkServices {
 
     private final WebClient webClient;
 
-    @Value("${Chzzk.URL.chzzkBaseURL}")
+    @Value("${chzzk.URL.chzzkBaseURL}")
     String chzzkBaseURL;
-    @Value("${Chzzk.URL.gameBaseURL}")
+    @Value("${chzzk.URL.gameBaseURL}")
     String gameBaseURL;
-    @Value("${Chzzk.NID_AUT}")
+    @Value("${chzzk.NID_AUT}")
     String nidAut;
-    @Value("${Chzzk.NID_SES}")
+    @Value("${chzzk.NID_SES}")
     String nidSes;
     @Value("${spring.application.version}")
     String applicationVersion;

@@ -1,14 +1,12 @@
 databaseChangeLog:
   - changeSet:
-      id: init
-      author: guribot
+      author: dendrocopos
+      id: 1
 
-  #ddl
-  - includeAll:
-      path: ddl/commandMessage
-      relativeToChangeLogFile: true
+  #- includeAll:
+  #    path: ddl/commandMessage
+  #    relativeToChangelogFile: true
 
-  #dml
   - includeAll:
       path: dml/commandMessage
-      relativeToChangeLogFile: true
+      relativeToChangelogFile: true
