@@ -2,7 +2,7 @@ package org.dendrocopos.chzzkbot.chzzk.chatenum;
 
 import java.util.Objects;
 
-public enum ChatCmd {
+public enum ChatCommand {
     PING(0),
     PONG(10000),
     CONNECT(100),
@@ -17,16 +17,17 @@ public enum ChatCmd {
     BLIND(94008),
     NOTICE(94010),
     PENALTY(94015),
-    SEND_CHAT(3101);
+    SEND_CHAT(3101),
+    MEMBER_SYNC(94201);//Member Sync 멤버 목록 동기화.
 
     private final int value;
 
-    ChatCmd(int value) {
+    ChatCommand(int value) {
         this.value = value;
     }
 
-    public static Object getCommand(int value) {
-        for (ChatCmd cmd : values()) {
+    public static Object getCommandValue(int value) {
+        for (ChatCommand cmd : values()) {
             if (Objects.equals(cmd.value, value)) {
                 return cmd;
             }

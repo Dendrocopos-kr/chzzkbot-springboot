@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 @Getter
 @Setter
@@ -11,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Entity
+@Audited
 @Table(name = "commandMessage")
 public class CommandMessageEntity {
 

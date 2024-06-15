@@ -10,6 +10,8 @@ spring:
     show-sql: false
     properties:
       hibernate:
+        #integrator_provider: org.hibernate.envers.boot.internal.EnversIntegrator
+        #naming-strategy: org.hibernate.cfg.ImproveNamingStrategy
         format_sql: true
         use_sql_comments: true
     open-in-view: true
@@ -41,10 +43,10 @@ logging:
   level:
     org.springframework.messaging: debug
     org.springframework.web.socket: debug
-    liquibase: debug
+    liquibase: info
 chzzk:
   NID_AUT: pAw0ywM4695bUa+qqaSGbcqA9JOPDJaeOULYkcOuQTerI63laYiFwJmaHITG8ux6
-  NID_SES: AAABjsCrfHWyoI7Gd2NCKi0WAOJIrOb5flAsbiUe1LWk4vtmpRWYjAy/O4BH4iVs0kKg6cJNmkbT8FH9bnB23N7U6rnaPY4y7n3IiU0RaQQtqCq1zHY1HTGNoxGwH5gWh92yLE07wkn7PEbk1EESQ4hIVcN3Sm2qUvMOPXqWbyf6xihdJxOG3xOM7r3a7YStjEgQtvZzG0PUzDBaUE9MQhr0k1UbMBUGZsJP8My2dMo8MIzApWJzKBlQEaBzPFzSF+H4+J1ye3hifi9N20lkGHKe8XlVXmkXCNyJR0J6PkF5TBNgxMwy3+kHWWrTDM4YMwK/3OQR8uL9fpshg648/S8otrBBltmu/tNmo6plwMEdQfO+10XLQMMDDr8YbAG+YkKEntwN83g2uicUC2KC8cMg1mi5W1KcPXjZwFBTEkanphV+5gvcFkQvyzzgMIFWYXhawrcA+IFCYiLhOxSQYGGmnQych9TzbvKGaQUEhdoNAZQgcEp2/3r0eAMpZuwa6KgKauM1IiopiuUiiv52BXrilXM=
+  NID_SES: AAABiz7Isfj3ej2rRmkZHyEeFetp4Hv6AhUhYEuC5hqoVcjElcOycjQ9EF5nfmONRYpXQevP+jSNKk1D28rW0M1gfr+RGZqfXdT9QAlPKdpYpTPrhpumFytX8z6zkv4chW8Eqh37DrrJW3bGazQlQAcraxjo3fAqRwrvM2gdWJyPlGsa4CHqtsyOVlv82HQWo3MVpWHiZfuhz7tuCFhaA/4z/dNOZ1MYJnWrIESj3L7sCU8RWkWakJlAk87taGXXunaxCglT1B9Gu2UlOds0F6t5ggGNPK68/WpLoMr8e5D1/GgRHK9gcB/lZTwrU263wndhvZ5fpUpS7YX8yXbmpcUYFUJQEaDVgICdZXM5XqPyBCKCqVWBPHFPR+HLmJay382hpDxLNu3hPd2Q+/Q+tSURd5DHs671dq7rD134pjaJf6y5o1dHYzV3ktFwj1Zfv+BqXB0kjflBKoEPXVXBNf9WJhH6d7uYkDpdYEew0JZ3r58GGZ3ullfQ6NfrtJDEbE5nwiILLcy5MO6M7uX+uzuUF8I=
   ChannelName: 뮤로나
   #ChannelId: 448acb33aff5339a08540f0d9e8e2652
   URL:
@@ -52,7 +54,7 @@ chzzk:
     gameBaseURL: https://comm-api.game.naver.com/
     naverBaseURL: https://apis.naver.com/
 user:
-  agent: chzzkBot/0.0.1 (Spring-boot)
+  agent: ${spring.application.name}/${spring.application.version}-(Spring-boot)
 eureka:
   client:
     fetch-registry: false
