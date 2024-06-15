@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -191,7 +192,7 @@ public class ChatMain {
                         (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
                         , ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg")
                 );
-                sendCommandMessage(session, (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString(), ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString().split(" ")[0]);
+                sendCommandMessage(session, gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class), ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString());
 
                 break;
             case ChatCmd.DONATION:
@@ -222,108 +223,128 @@ public class ChatMain {
 
     }
 
-    private void sendCommandMessage(WebSocketSession session, String nickName, String message) {
+    private void sendCommandMessage(WebSocketSession session, HashMap userInfo, String message) {
+        if (userInfo.get("nickname").toString().equals("뮤로나봇")) {
+            return;
+        }
+
         List<CommandMessageEntity> commandList = messageRepository.findAll();
 
-        //if (commandList.contains(message)) {
-        if (commandList.stream().anyMatch(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))) {
-            HashMap<String, Object> extras = new HashMap<>();
-            HashMap<String, Object> sendOptions = new HashMap<>();
-            HashMap<String, Object> bdy = new HashMap<>();
-            HashMap<String, Object> author = new HashMap<>();
+        HashMap<String, Object> extras = new HashMap<>();
+        HashMap<String, Object> sendOptions = new HashMap<>();
+        HashMap<String, Object> bdy = new HashMap<>();
+        //HashMap<String, Object> author = new HashMap<>();
 
-            extras.put("chatType", "STREAMING");
-            extras.put("emojis", "");
-            extras.put("osType", "PC");
-            extras.put("extraToken", tokenInfo.get("extraToken"));
-            extras.put("streamingChannelId", channelInfo.get("channelId"));
-/*
-            author.put("uid","448acb33aff5339a08540f0d9e8e2652"); // 봇계정 uid 필요함
-            author.put("name","");
-            author.put("imageURL","");
-            author.put("hasMod",true); // 메세지 전송자 streamer||streaming_channel_manager||streaming_chat_manager 확인
-*/
+        extras.put("chatType", "STREAMING");
+        extras.put("emojis", "");
+        extras.put("osType", "PC");
+        extras.put("extraToken", tokenInfo.get("extraToken"));
+        extras.put("streamingChannelId", channelInfo.get("channelId"));
 
-            bdy.put("msgTypeCode", 1);
-            bdy.put("extras", gson.toJson(extras));
-            //bdy.put("accTkn", tokenInfo.get("accessToken"));
-            bdy.put("msgTime", System.currentTimeMillis());
-            /*bdy.put("author", author);*/
-            if (commandList.stream()
-                    .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
-                    .findFirst().get().isNickNameUse()
+        bdy.put("msgTypeCode", 1);
+        bdy.put("extras", gson.toJson(extras));
+        bdy.put("msgTime", System.currentTimeMillis());
+
+        sendOptions.put("ver", "2");
+        sendOptions.put("svcid", svcid);
+        sendOptions.put("cid", cid);
+        sendOptions.put("tid", 3);
+        sendOptions.put("cmd", ChatCmd.SEND_CHAT.getValue());
+        sendOptions.put("retry", false);
+        sendOptions.put("sid", sid);
+
+        /* 명령어 권한 있을때 CUD*/
+
+        if (userInfo.get("userRoleCode").toString().equals("") || userInfo.get("nickname").toString().equals("칠색딱따구리")) {
+            String[] commandMessage = message.split(" ");
+
+            switch (commandMessage[0]) {
+                case "!추가":
+                    if (commandMessage.length == 4) {
+                        bdy.put("msg", commandMessage[1] + "명령어가 추가되었습니다.");
+                        messageRepository.save(CommandMessageEntity.builder()
+                                .cmdStr(commandMessage[1])
+                                .cmdMsg(commandMessage[2].replaceAll("_", " "))
+                                .nickNameUse(commandMessage[3].equalsIgnoreCase("true"))
+                                .build());
+                        sendOptions.put("bdy", bdy);
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    } else {
+                        bdy.put("msg", "!추가 [커맨드] [응답] [대상여부] 형식으로 입력해주세요." +
+                                "[응답 띄어쓰기는 _ 로 바꿔주세요]." +
+                                "[대상여부는 빈 값일 경우 true, false 로 입력해주세요].");
+                        sendOptions.put("bdy", bdy);
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    }
+                    break;
+                case "!수정":
+                    if (commandMessage.length == 4) {
+                        messageRepository.save(CommandMessageEntity.builder()
+                                .cmdStr(commandMessage[1])
+                                .cmdMsg(commandMessage[2].replaceAll("_", " "))
+                                .nickNameUse(commandMessage[3].equalsIgnoreCase("true"))
+                                .build());
+                        bdy.put("msg", commandMessage[1] + " 명령어가 수정되었습니다.");
+                        sendOptions.put("bdy", bdy);
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    } else {
+                        bdy.put("msg", "!수정 [커맨드] [응답] [대상여부] 형식으로 입력해주세요." +
+                                "[응답 띄어쓰기는 _ 로 바꿔주세요]." +
+                                "[대상여부는 빈 값일 경우 true, false 로 입력해주세요].");
+                        sendOptions.put("bdy", bdy);
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    }
+                    break;
+                case "!삭제":
+                    if (commandMessage.length == 2) {
+                        messageRepository.deleteById(commandMessage[1]);
+                        bdy.put("msg", commandMessage[0] + " 명령어가 삭제 되었습니다.");
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    } else {
+                        bdy.put("msg", "!삭제 [커맨드] 형식으로 입력해주세요.");
+                        sendOptions.put("bdy", bdy);
+                        session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                    }
+                    break;
+            }
+        }
+
+
+        if (commandList.stream()
+                .anyMatch(commandMessageEntity -> message.split(" ")[0].equals(commandMessageEntity.getCmdStr()))
+        ) {
+            if (
+                    commandList.stream()
+                            .filter(commandMessageEntity -> message.split(" ")[0].equals(commandMessageEntity.getCmdStr()))
+                            .findFirst()
+                            .map(CommandMessageEntity::isNickNameUse)
+                            .orElse(false)
             ) {
-                bdy.put("msg", nickName +
+                bdy.put("msg", userInfo.get("nickname") +
                         "님 " +
                         commandList.stream()
-                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
+                                .filter(commandMessageEntity -> message.split(" ")[0].equals(commandMessageEntity.getCmdStr()))
                                 .findFirst().get().getCmdMsg()
                 );
+                sendOptions.put("bdy", bdy);
+                session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
             } else {
-                bdy.put("msg",
-                        commandList.stream()
-                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
-                                .findFirst().get().getCmdMsg()
-                );
+                if (message.split(" ")[0].equals("!명령어")) {
+                    bdy.put("msg", commandList.stream().map(CommandMessageEntity::getCmdStr).collect(Collectors.toList()));
+                    sendOptions.put("bdy", bdy);
+                    session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                } else {
+                    bdy.put("msg",
+                            commandList.stream()
+                                    .filter(commandMessageEntity -> message.split(" ")[0].equals(commandMessageEntity.getCmdStr()))
+                                    .findFirst().get().getCmdMsg()
+                    );
+                    sendOptions.put("bdy", bdy);
+                    session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
+                }
             }
-
-/*
-
-            switch (message) {
-                case "눈나!!!":
-                    bdy.put("msg", "헤으응~");
-                    break;
-                case "거짓말":
-                    bdy.put("msg", "저 나디아 봇은 거짓말을 하고 있어요!");
-                    break;
-                case "뮤쪽이":
-                    bdy.put("msg", "응~! 나 뮤쪽인데 어쩔~");
-                    break;
-                case "ㄱㄴ?":
-                    bdy.put("msg", "지켜보고 있다..!");
-                    break;
-                case "!79행동":
-                    bdy.put("msg", "우끾끾!!");
-                    break;
-                case "매크로1":
-                    bdy.put("msg", "오늘 뭐 했어요?");
-                    break;
-                case "매크로2":
-                    bdy.put("msg", "오늘 뭐 먹었어요?");
-                    break;
-                case "뮤지리":
-                    bdy.put("msg", "뮤로나는 모잘라요! 내가 진짜임!");
-                    break;
-                case "뮤냥이":
-                    break;
-                case "사랑해":
-                    bdy.put("msg", "나도 사랑해요!");
-                    break;
-                case "79":
-                    bdy.put("msg", "맞음");
-                    break;
-                case "뮤빠":
-                    bdy.put("msg", nickName + "님 잘가요!");
-                    break;
-                default:
-                    bdy.put("msg", "그런 명령어는 없는데용?");
-            }
-*/
-
-
-            sendOptions.put("ver", "2");
-            sendOptions.put("svcid", svcid);
-            sendOptions.put("cid", cid);
-            sendOptions.put("tid", 3);
-            sendOptions.put("cmd", ChatCmd.SEND_CHAT.getValue());
-            sendOptions.put("retry", false);
-            sendOptions.put("sid", sid);
-            sendOptions.put("bdy", bdy);
-
-            log.info("sendOptions : {}", gson.toJson(sendOptions));
-
-            session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
         }
+
     }
 
     private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
