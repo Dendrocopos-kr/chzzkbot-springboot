@@ -41,12 +41,13 @@ public class ChatMain {
     private static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
     private static final String SUCCESS_CODE = "200.0";
     private static final String COMMAND_ENTITY_TRUE = "true";
-    final String SVCID_KEY = "svcid";
-    final String CMD_KEY = "cmd";
-    final String CID_KEY = "cid";
-    final String BDY_KEY = "bdy";
-    final String SID_KEY = "sid";
-    final String DOT = "\\.";
+    private static final String COMMAND = "!명령어";
+    private static final String SVCID_KEY = "svcid";
+    private static final String CMD_KEY = "cmd";
+    private static final String CID_KEY = "cid";
+    private static final String BDY_KEY = "bdy";
+    private static final String SID_KEY = "sid";
+    private static final String DOT = "\\.";
     private final ChzzkServices chzzkServices;
     private final Gson gson = new Gson();
     private final WebSocketClient websocketclient;
@@ -259,18 +260,21 @@ public class ChatMain {
     }
 
     private void checkForCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference, HashMap userInfo) {
-        String command = commandInputMessage.split(" ")[0];
+        //String command = commandInputMessage.split(" ")[0];
 
-        if (commandList.stream().anyMatch(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))) {
-            if (isCommandUsesNickname(command, commandList)) {
-                String responseMessage = userInfo.get("nickname") + "님 " + getCommandMessage(command, commandList);
+        if (commandList.stream().anyMatch(commandMessageEntity -> commandInputMessage.equals(commandMessageEntity.getCmdStr()))) {
+            if (isCommandUsesNickname(commandInputMessage, commandList)) {
+                String responseMessage = userInfo.get("nickname") + "님 " + getCommandMessage(commandInputMessage, commandList);
                 sendMessageToUser(session, responseMessage, messageSendOptionsReference);
             } else {
-                if (command.equals("!명령어")) {
-                    String allCommands = commandList.stream().map(CommandMessageEntity::getCmdStr).collect(Collectors.joining(", "));
+                if (commandInputMessage.equals(COMMAND)) {
+                    String allCommands = commandList.stream()
+                            .map(CommandMessageEntity::getCmdStr)
+                            .filter(s -> !s.equals(COMMAND))
+                            .collect(Collectors.joining(", "));
                     sendMessageToUser(session, allCommands, messageSendOptionsReference);
                 } else {
-                    String responseMessage = getCommandMessage(command, commandList);
+                    String responseMessage = getCommandMessage(commandInputMessage, commandList);
                     sendMessageToUser(session, responseMessage, messageSendOptionsReference);
                 }
             }
@@ -294,7 +298,7 @@ public class ChatMain {
     }
 
     private boolean isSpecialUser(HashMap userInfo) {
-        return userInfo.get(NICKNAME).toString().equals("뮤로나봇");
+        return userInfo.get(NICKNAME).toString().equals("뮤로나 봇");
     }
 
     private boolean hasCommandPermission(HashMap userInfo) {
@@ -328,7 +332,7 @@ public class ChatMain {
 
     private void handleAddOrModifyCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         if (commandArguments.length == CONSTANTS_OF_LENGTH_FOR_ADD_OR_MODIFY) {
-            String command = commandArguments[1];
+            String command = commandArguments[1].replaceAll("_", " ");
             String response = commandArguments[2].replaceAll("_", " ");
             boolean nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
 
@@ -348,7 +352,7 @@ public class ChatMain {
 
     private String getUsageMessageForModifyOrAddCommand() {
         return "!추가 [커맨드] [응답] [대상여부] 형식으로 입력해주세요." +
-                "[응답 띄어쓰기는 _ 로 바꿔주세요]." +
+                "[띄어쓰기는 _ 로 바꿔주세요]." +
                 "[대상여부는 빈 값일 경우 true, false 로 입력해주세요].";
     }
 
