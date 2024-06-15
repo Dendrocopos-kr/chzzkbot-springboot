@@ -22,6 +22,8 @@ public class ChzzkServices {
     String nidSes;
     @Value("${spring.application.version}")
     String applicationVersion;
+    @Value("${user.agent}")
+    String agent;
 
     public ChzzkServices(WebClient webClient) {
         this.webClient = webClient;
@@ -32,7 +34,7 @@ public class ChzzkServices {
                 .uri(chzzkBaseURL + path)
                 .accept(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.COOKIE, "NID_AUT=" + nidAut + ";NID_SES=" + nidSes)
-                .header(HttpHeaders.USER_AGENT, "guribot/" + applicationVersion + " (SpringBoot)")
+                .header(HttpHeaders.USER_AGENT, agent)
                 .retrieve()
                 .bodyToMono(String.class);
     }

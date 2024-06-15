@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: chzzkbot
+    version: 0.0.1
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: false
+    properties:
+      hibernate:
+        #integrator_provider: org.hibernate.envers.boot.internal.EnversIntegrator
+        #naming-strategy: org.hibernate.cfg.ImproveNamingStrategy
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/guribot
+    username: guribot
+    password: guribot
+    driver-class-name: org.postgresql.Driver
+  session:
+    jdbc:
+      initialize-schema: always
+  security:
+    user:
+      name: guribot
+      password: guribot
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    driver-class-name: ${spring.datasource.driver-class-name}
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    clear-checksums: false
+server:
+  port: 8080
+security:
+  allowed-uris: /,/admin,/test,/command
+logging:
+  level:
+    org.springframework.messaging: debug
+    org.springframework.web.socket: debug
+    liquibase: info
+chzzk:
+  NID_AUT: pAw0ywM4695bUa+qqaSGbcqA9JOPDJaeOULYkcOuQTerI63laYiFwJmaHITG8ux6
+  NID_SES: AAABiz7Isfj3ej2rRmkZHyEeFetp4Hv6AhUhYEuC5hqoVcjElcOycjQ9EF5nfmONRYpXQevP+jSNKk1D28rW0M1gfr+RGZqfXdT9QAlPKdpYpTPrhpumFytX8z6zkv4chW8Eqh37DrrJW3bGazQlQAcraxjo3fAqRwrvM2gdWJyPlGsa4CHqtsyOVlv82HQWo3MVpWHiZfuhz7tuCFhaA/4z/dNOZ1MYJnWrIESj3L7sCU8RWkWakJlAk87taGXXunaxCglT1B9Gu2UlOds0F6t5ggGNPK68/WpLoMr8e5D1/GgRHK9gcB/lZTwrU263wndhvZ5fpUpS7YX8yXbmpcUYFUJQEaDVgICdZXM5XqPyBCKCqVWBPHFPR+HLmJay382hpDxLNu3hPd2Q+/Q+tSURd5DHs671dq7rD134pjaJf6y5o1dHYzV3ktFwj1Zfv+BqXB0kjflBKoEPXVXBNf9WJhH6d7uYkDpdYEew0JZ3r58GGZ3ullfQ6NfrtJDEbE5nwiILLcy5MO6M7uX+uzuUF8I=
+  ChannelName: 뮤로나
+  #ChannelId: 448acb33aff5339a08540f0d9e8e2652
+  URL:
+    chzzkBaseURL: https://api.chzzk.naver.com/
+    gameBaseURL: https://comm-api.game.naver.com/
+    naverBaseURL: https://apis.naver.com/
+user:
+  agent: ${spring.application.name}/${spring.application.version}-(Spring-boot)
+eureka:
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://localhost:${server.port}/eureka/
+  instance:
+    hostname: localhost
