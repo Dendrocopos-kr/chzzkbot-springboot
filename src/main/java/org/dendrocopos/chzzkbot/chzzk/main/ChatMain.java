@@ -1,6 +1,5 @@
 package org.dendrocopos.chzzkbot.chzzk.main;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +23,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -31,9 +32,23 @@ import java.util.List;
 public class ChatMain {
     private static final String CONTENT = "content";
     private static final String DATA = "data";
+    private static final String NICKNAME = "nickname";
+    private static final String USER_ROLE_CODE = "userRoleCode";
+    private static final String COMMAND_ADD = "!추가";
+    private static final String COMMAND_MODIFY = "!수정";
+    private static final String COMMAND_DELETE = "!삭제";
+    private static final int CONSTANTS_OF_LENGTH_FOR_ADD_OR_MODIFY = 4;
+    private static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
+    private static final String SUCCESS_CODE = "200.0";
+    private static final String COMMAND_ENTITY_TRUE = "true";
+    final String SVCID_KEY = "svcid";
+    final String CMD_KEY = "cmd";
+    final String CID_KEY = "cid";
+    final String BDY_KEY = "bdy";
+    final String SID_KEY = "sid";
+    final String DOT = "\\.";
     private final ChzzkServices chzzkServices;
     private final Gson gson = new Gson();
-    private final ObjectMapper mapper = new ObjectMapper();
     private final WebSocketClient websocketclient;
     private final CommandMessageRepository messageRepository;
     HashMap<String, Object> openWebSocketJson = new HashMap();
@@ -50,53 +65,49 @@ public class ChatMain {
 
     @EventListener(ApplicationReadyEvent.class)
     public void startWebSocket() {
+        fetchChannelInfo();
+        fetchUserStatus();
+        fetchChatChannelInfo();
+        fetchToken();
+        establishWebSocketConnection();
+    }
 
-        /**
-         * 채널 검색
-         */
+    private void fetchChannelInfo() {
         String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
                 .block();
         log.info("channelSearch : {}", searchChannelInfo);
-
         HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
         channelInfo = processChannelSearch(searchChannelData);
+    }
 
-        /**
-         * UID 가져오기
-         */
-
+    private void fetchUserStatus() {
         String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
         HashMap myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
-        if (myInfoContent.get("code").toString().equals("200.0")) {
+        if (myInfoContent.get("code").toString().equals(SUCCESS_CODE)) {
             myInfo = ((LinkedTreeMap) myInfoContent.get("content"));
             log.info("search myInfo : {}", myInfo);
         }
+    }
 
-        /**
-         * 채널 ChatId 가져오기
-         */
+    private void fetchChatChannelInfo() {
         String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
-
         HashMap searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
-        if (searchChatChannel.get("code").toString().equals("200.0")) {
+        if (searchChatChannel.get("code").toString().equals(SUCCESS_CODE)) {
             chatChannelInfo = ((LinkedTreeMap) searchChatChannel.get("content"));
             log.info("search chatChannelInfo : {}", chatChannelInfo);
         }
+    }
 
-        /**
-         * 채널 accessToken 가져오기
-         */
+    private void fetchToken() {
         String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
         HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
-        if (searchToken.get("code").toString().equals("200.0")) {
+        if (searchToken.get("code").toString().equals(SUCCESS_CODE)) {
             tokenInfo = ((LinkedTreeMap) searchToken.get("content"));
             log.info("search tokenInfo : {}", tokenInfo);
         }
+    }
 
-        /**
-         * 채널ID로 챗 연결
-         */
-
+    private void establishWebSocketConnection() {
         openWebSocketJson = new HashMap();
         bdy = new HashMap();
         bdy.put("accTkn", tokenInfo.get("accessToken"));
@@ -109,10 +120,8 @@ public class ChatMain {
         openWebSocketJson.put("ver", "2");
         openWebSocketJson.put("tid", 1);
         openWebSocketJson.put("cmd", 100);
-
         processSendMessage(gson.toJson(openWebSocketJson));
     }
-
 
     public void processSendMessage(String message) {
 
@@ -147,73 +156,75 @@ public class ChatMain {
         log.info("Received WebSocket message: {}", receivedMessage);
 
         HashMap messageInfo = gson.fromJson(receivedMessage, HashMap.class);
-        int cmd = Integer.parseInt(messageInfo.get("cmd").toString().split("\\.")[0]);
+        int cmd = Integer.parseInt(messageInfo.get(CMD_KEY).toString().split(DOT)[0]);
 
-        if (messageInfo.get("svcid") != null) {
-            svcid = messageInfo.get("svcid").toString();
+        if (messageInfo.get(SVCID_KEY) != null) {
+            svcid = messageInfo.get(SVCID_KEY).toString();
         }
-        if (messageInfo.get("cid") != null) {
-            cid = messageInfo.get("cid").toString();
+        if (messageInfo.get(CID_KEY) != null) {
+            cid = messageInfo.get(CID_KEY).toString();
         }
-        if (messageInfo.get("bdy") != null && messageInfo.get("bdy") instanceof LinkedTreeMap && ((LinkedTreeMap) messageInfo.get("bdy")).get("sid") != null) {
-            sid = ((LinkedTreeMap) messageInfo.get("bdy")).get("sid").toString();
+        if (messageInfo.get(BDY_KEY) != null
+                && messageInfo.get(BDY_KEY) instanceof LinkedTreeMap
+                && ((LinkedTreeMap) messageInfo.get(BDY_KEY)).get(SID_KEY) != null) {
+            sid = ((LinkedTreeMap) messageInfo.get(BDY_KEY)).get(SID_KEY).toString();
         }
 
         switch (ChatCmd.getCommand(cmd)) {
             case ChatCmd.PING:
-                //log.info("PING : {}", ChatCmd.PING.getValue());
+                log.info("PING : {}", ChatCmd.PING.getValue());
                 break;
             case ChatCmd.PONG:
-                //log.info("PONG : {}", ChatCmd.PONG.getValue());
+                log.info("PONG : {}", ChatCmd.PONG.getValue());
                 break;
             case ChatCmd.CONNECT:
-                //log.info("CONNECT : {}", ChatCmd.CONNECT.getValue());
+                log.info("CONNECT : {}", ChatCmd.CONNECT.getValue());
                 break;
             case ChatCmd.CONNECTED:
-                //log.info("CONNECTED : {}", ChatCmd.CONNECTED.getValue());
+                log.info("CONNECTED : {}", ChatCmd.CONNECTED.getValue());
                 bdy.put("sid", ((LinkedTreeMap) messageInfo.get("bdy")).get("sid"));
                 openWebSocketJson.put("bdy", bdy);
-                //log.info("openWebSocketJson : {}", openWebSocketJson);
+                log.info("openWebSocketJson : {}", openWebSocketJson);
                 session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
                 break;
             case ChatCmd.REQUEST_RECENT_CHAT:
-                //log.info("REQUEST_RECENT_CHAT : {}", ChatCmd.REQUEST_RECENT_CHAT.getValue());
+                log.info("REQUEST_RECENT_CHAT : {}", ChatCmd.REQUEST_RECENT_CHAT.getValue());
                 break;
             case ChatCmd.RECENT_CHAT:
-                //log.info("RECENT_CHAT : {}", ChatCmd.RECENT_CHAT.getValue());
+                log.info("RECENT_CHAT : {}", ChatCmd.RECENT_CHAT.getValue());
                 break;
             case ChatCmd.EVENT:
-                //log.info("EVENT : {}", ChatCmd.EVENT.getValue());
+                log.info("EVENT : {}", ChatCmd.EVENT.getValue());
                 break;
             case ChatCmd.CHAT:
-                //log.info("CHAT : {}", ChatCmd.CHAT.getValue());
-                log.info("{} : {}",
+                log.info("CHAT :{} : {} : {}",
+                        ChatCmd.CHAT.getValue(),
                         (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
                         , ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg")
                 );
-                sendCommandMessage(session, (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString(), ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString().split(" ")[0]);
+                sendCommandMessage(session, gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("profile"), HashMap.class), ((LinkedTreeMap) ((ArrayList) messageInfo.get("bdy")).get(0)).get("msg").toString());
 
                 break;
             case ChatCmd.DONATION:
-                //log.info("DONATION : {}", ChatCmd.DONATION.getValue());
+                log.info("DONATION : {}", ChatCmd.DONATION.getValue());
                 break;
             case ChatCmd.KICK:
-                //log.info("KICK : {}", ChatCmd.KICK.getValue());
+                log.info("KICK : {}", ChatCmd.KICK.getValue());
                 break;
             case ChatCmd.BLOCK:
-                //log.info("BLOCK : {}", ChatCmd.BLOCK.getValue());
+                log.info("BLOCK : {}", ChatCmd.BLOCK.getValue());
                 break;
             case ChatCmd.BLIND:
-                //log.info("BLIND : {}", ChatCmd.BLIND.getValue());
+                log.info("BLIND : {}", ChatCmd.BLIND.getValue());
                 break;
             case ChatCmd.NOTICE:
-                //log.info("NOTICE : {}", ChatCmd.NOTICE.getValue());
+                log.info("NOTICE : {}", ChatCmd.NOTICE.getValue());
                 break;
             case ChatCmd.PENALTY:
-                //log.info("PENALTY : {}", ChatCmd.PENALTY.getValue());
+                log.info("PENALTY : {}", ChatCmd.PENALTY.getValue());
                 break;
             case ChatCmd.SEND_CHAT:
-                //log.info("SEND_CHAT : {}", ChatCmd.SEND_CHAT.getValue());
+                log.info("SEND_CHAT : {}", ChatCmd.SEND_CHAT.getValue());
                 break;
             default:
                 log.info("Unknown command : {}", ChatCmd.getCommand(cmd));
@@ -222,108 +233,149 @@ public class ChatMain {
 
     }
 
-    private void sendCommandMessage(WebSocketSession session, String nickName, String message) {
+    private void sendCommandMessage(WebSocketSession session, HashMap userInfo, String commandInputMessage) {
+        if (isSpecialUser(userInfo)) {
+            return;
+        }
         List<CommandMessageEntity> commandList = messageRepository.findAll();
 
-        //if (commandList.contains(message)) {
-        if (commandList.stream().anyMatch(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))) {
-            HashMap<String, Object> extras = new HashMap<>();
-            HashMap<String, Object> sendOptions = new HashMap<>();
-            HashMap<String, Object> bdy = new HashMap<>();
-            HashMap<String, Object> author = new HashMap<>();
+        final AtomicReference<HashMap<String, Object>> messageSendOptions = initializeMessageSendOptions(); // Final
 
-            extras.put("chatType", "STREAMING");
-            extras.put("emojis", "");
-            extras.put("osType", "PC");
-            extras.put("extraToken", tokenInfo.get("extraToken"));
-            extras.put("streamingChannelId", channelInfo.get("channelId"));
-/*
-            author.put("uid","448acb33aff5339a08540f0d9e8e2652"); // 봇계정 uid 필요함
-            author.put("name","");
-            author.put("imageURL","");
-            author.put("hasMod",true); // 메세지 전송자 streamer||streaming_channel_manager||streaming_chat_manager 확인
-*/
+        if (hasCommandPermission(userInfo)) {
+            String[] commandArguments = commandInputMessage.split(" ");
+            String commandType = commandArguments[0];
 
-            bdy.put("msgTypeCode", 1);
-            bdy.put("extras", gson.toJson(extras));
-            //bdy.put("accTkn", tokenInfo.get("accessToken"));
-            bdy.put("msgTime", System.currentTimeMillis());
-            /*bdy.put("author", author);*/
-            if (commandList.stream()
-                    .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
-                    .findFirst().get().isNickNameUse()
-            ) {
-                bdy.put("msg", nickName +
-                        "님 " +
-                        commandList.stream()
-                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
-                                .findFirst().get().getCmdMsg()
-                );
-            } else {
-                bdy.put("msg",
-                        commandList.stream()
-                                .filter(commandMessageEntity -> message.equals(commandMessageEntity.getCmdStr()))
-                                .findFirst().get().getCmdMsg()
-                );
+            switch (commandType) {
+                case COMMAND_ADD:
+                case COMMAND_MODIFY:
+                    handleAddOrModifyCommand(session, commandArguments, messageSendOptions);
+                    break;
+                case COMMAND_DELETE:
+                    handleDeleteCommand(session, commandArguments, messageSendOptions);
+                    break;
             }
-
-/*
-
-            switch (message) {
-                case "눈나!!!":
-                    bdy.put("msg", "헤으응~");
-                    break;
-                case "거짓말":
-                    bdy.put("msg", "저 나디아 봇은 거짓말을 하고 있어요!");
-                    break;
-                case "뮤쪽이":
-                    bdy.put("msg", "응~! 나 뮤쪽인데 어쩔~");
-                    break;
-                case "ㄱㄴ?":
-                    bdy.put("msg", "지켜보고 있다..!");
-                    break;
-                case "!79행동":
-                    bdy.put("msg", "우끾끾!!");
-                    break;
-                case "매크로1":
-                    bdy.put("msg", "오늘 뭐 했어요?");
-                    break;
-                case "매크로2":
-                    bdy.put("msg", "오늘 뭐 먹었어요?");
-                    break;
-                case "뮤지리":
-                    bdy.put("msg", "뮤로나는 모잘라요! 내가 진짜임!");
-                    break;
-                case "뮤냥이":
-                    break;
-                case "사랑해":
-                    bdy.put("msg", "나도 사랑해요!");
-                    break;
-                case "79":
-                    bdy.put("msg", "맞음");
-                    break;
-                case "뮤빠":
-                    bdy.put("msg", nickName + "님 잘가요!");
-                    break;
-                default:
-                    bdy.put("msg", "그런 명령어는 없는데용?");
-            }
-*/
-
-
-            sendOptions.put("ver", "2");
-            sendOptions.put("svcid", svcid);
-            sendOptions.put("cid", cid);
-            sendOptions.put("tid", 3);
-            sendOptions.put("cmd", ChatCmd.SEND_CHAT.getValue());
-            sendOptions.put("retry", false);
-            sendOptions.put("sid", sid);
-            sendOptions.put("bdy", bdy);
-
-            log.info("sendOptions : {}", gson.toJson(sendOptions));
-
-            session.send(Mono.just(session.textMessage(gson.toJson(sendOptions)))).subscribe();
         }
+        checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
+    }
+
+    private void checkForCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference, HashMap userInfo) {
+        String command = commandInputMessage.split(" ")[0];
+
+        if (commandList.stream().anyMatch(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))) {
+            if (isCommandUsesNickname(command, commandList)) {
+                String responseMessage = userInfo.get("nickname") + "님 " + getCommandMessage(command, commandList);
+                sendMessageToUser(session, responseMessage, messageSendOptionsReference);
+            } else {
+                if (command.equals("!명령어")) {
+                    String allCommands = commandList.stream().map(CommandMessageEntity::getCmdStr).collect(Collectors.joining(", "));
+                    sendMessageToUser(session, allCommands, messageSendOptionsReference);
+                } else {
+                    String responseMessage = getCommandMessage(command, commandList);
+                    sendMessageToUser(session, responseMessage, messageSendOptionsReference);
+                }
+            }
+        }
+    }
+
+    private String getCommandMessage(String command, List<CommandMessageEntity> commandList) {
+        return commandList.stream()
+                .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
+                .findFirst()
+                .map(CommandMessageEntity::getCmdMsg)
+                .orElse(null);
+    }
+
+    private boolean isCommandUsesNickname(String command, List<CommandMessageEntity> commandList) {
+        return commandList.stream()
+                .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
+                .findFirst()
+                .map(CommandMessageEntity::isNickNameUse)
+                .orElse(false);
+    }
+
+    private boolean isSpecialUser(HashMap userInfo) {
+        return userInfo.get(NICKNAME).toString().equals("뮤로나봇");
+    }
+
+    private boolean hasCommandPermission(HashMap userInfo) {
+        return userInfo.get(USER_ROLE_CODE).toString().equals("") || userInfo.get(NICKNAME).toString().equals("칠색딱따구리");
+    }
+
+    private AtomicReference<HashMap<String, Object>> initializeMessageSendOptions() {
+        HashMap<String, Object> messageSendOptions = new HashMap<>();
+        messageSendOptions.put("ver", "2");
+        messageSendOptions.put("svcid", svcid);
+        messageSendOptions.put("cid", cid);
+        messageSendOptions.put("tid", 3);
+        messageSendOptions.put("cmd", ChatCmd.SEND_CHAT.getValue());
+        messageSendOptions.put("retry", false);
+        messageSendOptions.put("sid", sid);
+        return new AtomicReference<>(messageSendOptions);
+    }
+
+    private void handleDeleteCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
+        if (commandArguments.length == CONSTANT_OF_LENGTH_FOR_DELETE) {
+            String command = commandArguments[1];
+            messageRepository.deleteById(command);
+
+            String feedbackMessage = command + " 명령어가 삭제 되었습니다.";
+            sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+        } else {
+            String feedbackMessage = "!삭제 [커맨드] 형식으로 입력해주세요.";
+            sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+        }
+    }
+
+    private void handleAddOrModifyCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
+        if (commandArguments.length == CONSTANTS_OF_LENGTH_FOR_ADD_OR_MODIFY) {
+            String command = commandArguments[1];
+            String response = commandArguments[2].replaceAll("_", " ");
+            boolean nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
+
+            messageRepository.save(CommandMessageEntity.builder()
+                    .cmdStr(command)
+                    .cmdMsg(response)
+                    .nickNameUse(nicknameUse)
+                    .build());
+
+            String feedbackMessage = command + " 명령어가 수정되었습니다.";
+            sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+        } else {
+            String feedbackMessage = getUsageMessageForModifyOrAddCommand();
+            sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+        }
+    }
+
+    private String getUsageMessageForModifyOrAddCommand() {
+        return "!추가 [커맨드] [응답] [대상여부] 형식으로 입력해주세요." +
+                "[응답 띄어쓰기는 _ 로 바꿔주세요]." +
+                "[대상여부는 빈 값일 경우 true, false 로 입력해주세요].";
+    }
+
+    private void sendMessageToUser(WebSocketSession session, String msg, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
+        HashMap<String, Object> messageBody = initializeMessageBody();
+        messageBody.put("msg", msg);
+        messageSendOptionsReference.get().put("bdy", messageBody);
+        session.send(Mono.just(session.textMessage(gson.toJson(messageSendOptionsReference.get())))).subscribe();
+    }
+
+    private HashMap<String, Object> initializeMessageBody() {
+        HashMap<String, Object> messageExtras = initializeMessageExtras();
+        HashMap<String, Object> messageBody = new HashMap<>();
+        messageBody.put("msgTypeCode", 1);
+        messageBody.put("extras", gson.toJson(messageExtras));
+        messageBody.put("msgTime", System.currentTimeMillis());
+        return messageBody;
+    }
+
+    private HashMap<String, Object> initializeMessageExtras() {
+        HashMap<String, Object> messageExtras = new HashMap<>();
+        messageExtras.put("chatType", "STREAMING");
+        messageExtras.put("emojis", "");
+        messageExtras.put("osType", "PC");
+        messageExtras.put("extraToken", tokenInfo.get("extraToken"));
+        messageExtras.put("streamingChannelId", channelInfo.get("channelId"));
+        return messageExtras;
     }
 
     private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
