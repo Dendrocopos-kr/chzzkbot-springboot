@@ -39,9 +39,9 @@ security:
   allowed-uris: /,/admin,/test,/command
 logging:
   level:
-    org.springframework.messaging: info
-    org.springframework.web.socket: info
-    liquibase: info
+    org.springframework.messaging: debug
+    org.springframework.web.socket: debug
+    liquibase: debug
 chzzk:
   ChannelName: 뮤로나
   URL:

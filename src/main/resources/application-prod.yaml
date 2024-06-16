@@ -44,13 +44,12 @@ logging:
     liquibase: error
 chzzk:
   ChannelName: 뮤로나
-  #ChannelId: 448acb33aff5339a08540f0d9e8e2652
   URL:
     chzzkBaseURL: https://api.chzzk.naver.com/
     gameBaseURL: https://comm-api.game.naver.com/
     naverBaseURL: https://apis.naver.com/
 user:
-  agent: chzzkBot/0.0.1 (Spring-boot)
+  agent: ${spring.application.name}/${spring.application.version}-(Spring-boot)
 eureka:
   client:
     fetch-registry: false
