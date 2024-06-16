@@ -1,5 +1,6 @@
 package org.dendrocopos.chzzkbot.chzzk.chatservice;
 
+import org.dendrocopos.chzzkbot.chzzk.nid.nid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,10 +17,6 @@ public class ChzzkServices {
     String chzzkBaseURL;
     @Value("${chzzk.URL.gameBaseURL}")
     String gameBaseURL;
-    @Value("${chzzk.NID_AUT}")
-    String nidAut;
-    @Value("${chzzk.NID_SES}")
-    String nidSes;
     @Value("${spring.application.version}")
     String applicationVersion;
     @Value("${user.agent}")
@@ -33,7 +30,7 @@ public class ChzzkServices {
         return webClient.get()
                 .uri(chzzkBaseURL + path)
                 .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.COOKIE, "NID_AUT=" + nidAut + ";NID_SES=" + nidSes)
+                .header(HttpHeaders.COOKIE, "NID_AUT=" + nid.NID_AUT + ";NID_SES=" + nid.NID_SES)
                 .header(HttpHeaders.USER_AGENT, agent)
                 .retrieve()
                 .bodyToMono(String.class);
@@ -47,7 +44,7 @@ public class ChzzkServices {
         return webClient.get()
                 .uri(gameBaseURL + path)
                 .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.COOKIE, "NID_AUT=" + nidAut + ";NID_SES=" + nidSes)
+                .header(HttpHeaders.COOKIE, "NID_AUT=" + nid.NID_AUT + ";NID_SES=" + nid.NID_SES)
                 .retrieve()
                 .bodyToMono(String.class);
     }
