@@ -39,12 +39,10 @@ security:
   allowed-uris: /,/admin,/test,/command
 logging:
   level:
-    org.springframework.messaging: debug
-    org.springframework.web.socket: debug
-    liquibase: debug
+    org.springframework.messaging: info
+    org.springframework.web.socket: info
+    liquibase: info
 chzzk:
-  NID_AUT: pAw0ywM4695bUa+qqaSGbcqA9JOPDJaeOULYkcOuQTerI63laYiFwJmaHITG8ux6
-  NID_SES: AAABjsCrfHWyoI7Gd2NCKi0WAOJIrOb5flAsbiUe1LWk4vtmpRWYjAy/O4BH4iVs0kKg6cJNmkbT8FH9bnB23N7U6rnaPY4y7n3IiU0RaQQtqCq1zHY1HTGNoxGwH5gWh92yLE07wkn7PEbk1EESQ4hIVcN3Sm2qUvMOPXqWbyf6xihdJxOG3xOM7r3a7YStjEgQtvZzG0PUzDBaUE9MQhr0k1UbMBUGZsJP8My2dMo8MIzApWJzKBlQEaBzPFzSF+H4+J1ye3hifi9N20lkGHKe8XlVXmkXCNyJR0J6PkF5TBNgxMwy3+kHWWrTDM4YMwK/3OQR8uL9fpshg648/S8otrBBltmu/tNmo6plwMEdQfO+10XLQMMDDr8YbAG+YkKEntwN83g2uicUC2KC8cMg1mi5W1KcPXjZwFBTEkanphV+5gvcFkQvyzzgMIFWYXhawrcA+IFCYiLhOxSQYGGmnQych9TzbvKGaQUEhdoNAZQgcEp2/3r0eAMpZuwa6KgKauM1IiopiuUiiv52BXrilXM=
   ChannelName: 뮤로나
   #ChannelId: 448acb33aff5339a08540f0d9e8e2652
   URL:

@@ -2,6 +2,7 @@ package org.dendrocopos.chzzkbot.chzzk.main;
 
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
@@ -12,13 +13,13 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,115 +35,112 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChatMain {
-    private static final String CONTENT = "content";
-    private static final String DATA = "data";
-    private static final String NICKNAME = "nickname";
-    private static final String USER_ROLE_CODE = "userRoleCode";
-    private static final String COMMAND_ADD = "!추가";
-    private static final String COMMAND_MODIFY = "!수정";
-    private static final String COMMAND_DELETE = "!삭제";
-    private static final int CONSTANTS_OF_LENGTH_FOR_ADD_OR_MODIFY = 4;
-    private static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
-    private static final String SUCCESS_CODE = "200.0";
-    private static final String COMMAND_ENTITY_TRUE = "true";
-    private static final String COMMAND = "!명령어";
-    private static final String UPTIME = "!업타임";
-    private static final String SVCID_KEY = "svcid";
-    private static final String CMD_KEY = "cmd";
-    private static final String CID_KEY = "cid";
-    private static final String BDY_KEY = "bdy";
-    private static final String SID_KEY = "sid";
-    private static final String DOT = "\\.";
-    private static final String STATUS = "status";
-    private static final String OPEN_DATE = "openDate";
-    private static final String CLOSE_DATE = "closeDate";
-    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String CONTENT = "content";
+    public static final String DATA = "data";
+    public static final String NICKNAME = "nickname";
+    public static final String USER_ROLE_CODE = "userRoleCode";
+    public static final String COMMAND_ADD = "!추가";
+    public static final String COMMAND_MODIFY = "!수정";
+    public static final String COMMAND_DELETE = "!삭제";
+    public static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
+    public static final String SUCCESS_CODE = "200.0";
+    public static final String COMMAND_ENTITY_TRUE = "true";
+    public static final String COMMAND = "!명령어";
+    public static final String UPTIME = "!업타임";
+    public static final String SVCID_KEY = "svcid";
+    public static final String CMD_KEY = "cmd";
+    public static final String CID_KEY = "cid";
+    public static final String BDY_KEY = "bdy";
+    public static final String SID_KEY = "sid";
+    public static final String DOT = "\\.";
+    public static final String STATUS = "status";
+    public static final String OPEN_DATE = "openDate";
+    public static final String CLOSE_DATE = "closeDate";
+    public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
     private final Gson gson = new Gson();
-    private final WebSocketClient websocketclient;
     private final CommandMessageRepository messageRepository;
     private final DonationMessageRepository donationMessageRepository;
     private final NormalMessageRepository normalMessageRepository;
+    @Getter
+    public LinkedTreeMap channelInfoDetail;
     HashMap<String, Object> openWebSocketJson = new HashMap();
     HashMap<String, Object> bdy = new HashMap();
+    private Disposable webSocketSessionDisposable;
     private LinkedTreeMap channelInfo;
     private LinkedTreeMap chatChannelInfo;
     private LinkedTreeMap tokenInfo;
     private LinkedTreeMap myInfo;
-    private LinkedTreeMap channelInfoDetail;
     private String svcid;
     private String cid;
     private String sid;
     @Value("${chzzk.ChannelName}")
     private String channelName;
+    private boolean isWebSocketOpen = false;
 
-    @EventListener(ApplicationReadyEvent.class)
+    public boolean isWebSocketOpen() {
+        return isWebSocketOpen;
+    }
+
+    //@EventListener(ApplicationReadyEvent.class)
     public void startWebSocket() {
-        fetchChannelInfo();
-        fetchUserStatus();
-        fetchChatChannelInfo();
-        fetchChannelDetail();
-        fetchToken();
+        channelInfo = fetchChannelInfo();
+        myInfo = fetchUserStatus();
+        chatChannelInfo = fetchChatChannelInfo();
+        channelInfoDetail = fetchChannelDetail();
+        tokenInfo = fetchToken();
         establishWebSocketConnection();
     }
 
-    private void fetchChannelDetail() {
+    public LinkedTreeMap fetchChannelDetail() {
         String searchChannelDteail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
         HashMap channelDteail = gson.fromJson(searchChannelDteail, HashMap.class);
         if (channelDteail.get("code").toString().equals(SUCCESS_CODE)) {
-            channelInfoDetail = ((LinkedTreeMap) channelDteail.get("content"));
-            log.info("searchChannelInfoDetail : {}", channelInfoDetail);
-
-            /**
-             * 채널 오픈 여부
-             * channelInfoDetail.get("status");
-             */
-            /**
-             * 채널 시작 시간
-             * channelInfoDetail.get("openDate");
-             */
-            /**
-             * 채널 종료 시간
-             * channelInfoDetail.get("closeDate");
-             */
+            //log.debug("searchChannelInfoDetail : {}", channelDteail.get("content"));
+            return channelInfoDetail = ((LinkedTreeMap) channelDteail.get("content"));
         }
+        return null;
     }
 
-    private void fetchChannelInfo() {
+    public LinkedTreeMap fetchChannelInfo() {
         String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
                 .block();
-        log.info("channelSearch : {}", searchChannelInfo);
+        //log.debug("channelSearch : {}", searchChannelInfo);
         HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
-        channelInfo = processChannelSearch(searchChannelData);
+        return channelInfo = processChannelSearch(searchChannelData);
     }
 
-    private void fetchUserStatus() {
+    private LinkedTreeMap fetchUserStatus() {
         String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
         HashMap myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
         if (myInfoContent.get("code").toString().equals(SUCCESS_CODE)) {
-            myInfo = ((LinkedTreeMap) myInfoContent.get("content"));
-            log.info("search myInfo : {}", myInfo);
+            log.debug("search myInfo : {}", myInfoContent.get("content"));
+            return ((LinkedTreeMap) myInfoContent.get("content"));
         }
+        return null;
     }
 
-    private void fetchChatChannelInfo() {
+    private LinkedTreeMap fetchChatChannelInfo() {
         String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
         HashMap searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
         if (searchChatChannel.get("code").toString().equals(SUCCESS_CODE)) {
-            chatChannelInfo = ((LinkedTreeMap) searchChatChannel.get("content"));
-            log.info("search chatChannelInfo : {}", chatChannelInfo);
+            log.debug("search chatChannelInfo : {}", searchChatChannel.get("content"));
+            return ((LinkedTreeMap) searchChatChannel.get("content"));
         }
+        return null;
     }
 
-    private void fetchToken() {
+    private LinkedTreeMap fetchToken() {
         String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
         HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
         if (searchToken.get("code").toString().equals(SUCCESS_CODE)) {
-            tokenInfo = ((LinkedTreeMap) searchToken.get("content"));
-            log.info("search tokenInfo : {}", tokenInfo);
+            log.debug("search tokenInfo : {}", searchToken.get("content"));
+            return ((LinkedTreeMap) searchToken.get("content"));
         }
+        return null;
     }
 
     private void establishWebSocketConnection() {
@@ -165,6 +163,14 @@ public class ChatMain {
         }
     }
 
+    // 웹소켓 연결 종료 코드
+    public void stopWebSocketConnection() {
+        if (webSocketSessionDisposable != null && !webSocketSessionDisposable.isDisposed()) {
+            webSocketSessionDisposable.dispose();
+            isWebSocketOpen = false;
+        }
+    }
+
     public void processSendMessage(String message) {
 
         int serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
@@ -173,29 +179,35 @@ public class ChatMain {
         pongCmd.put("cmd", ChatCommand.PONG.getValue());
         pongCmd.put("ver", "2");
 
-        websocketclient.execute(
+        webSocketSessionDisposable = websocketclient.execute(
                 URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"),
-                session ->
-                        Flux.merge(
-                                // Periodic message sending every 20 seconds
-                                session.send(Mono.just(session.textMessage(message))) // Initial message after connection setup
-                                        .thenMany(
-                                                Flux.interval(Duration.ofSeconds(20)) // Interval setup
-                                                        .flatMap(time -> session.send(Mono.just(session.textMessage(gson.toJson(pongCmd))))
-                                                        ) // Message sending every 20 seconds
-                                        ),
-                                // Handling received messages from server
-                                session.receive() // Handling received messages similar to original code
-                                        .map(WebSocketMessage::getPayloadAsText)
-                                        .doOnNext(s -> processReceivedMessage(session, s))
-                        ).then()
-        ).subscribe(null, null, () -> {
-            //log.info("종료시 실행할 곳");
-        });
+                session -> {
+                    isWebSocketOpen = true;
+                    return Flux.merge(
+                            // Periodic message sending every 20 seconds
+                            session.send(Mono.just(session.textMessage(message))) // 연결 설정 후 초기 메시지 전송
+                                    .thenMany(
+                                            Flux.interval(Duration.ofSeconds(20)) // Interval setup
+                                                    .flatMap(time -> session.send(
+                                                            Mono.just(session.textMessage(gson.toJson(pongCmd))))
+                                                    ) // Message sending every 20 seconds
+
+                                    ),
+                            // Handling received messages from server
+                            session.receive() // 메시지 받기
+                                    .map(WebSocketMessage::getPayloadAsText)
+                                    .doOnNext(s -> processReceivedMessage(session, s)) // 받은 메시지 처리하기
+                    ).doOnCancel(() -> {
+                        // this block will be executed when the subscription is cancelled
+                        sendMessageToUser(session, "나님 자러갈게...", initializeMessageSendOptions());
+                        isWebSocketOpen = false;
+                    }).then();
+                }
+        ).subscribe();
     }
 
     public void processReceivedMessage(WebSocketSession session, String receivedMessage) {
-        //log.info("Received WebSocket message: {}", receivedMessage);
+        log.debug("Received WebSocket message: {}", receivedMessage);
         HashMap<String, Object> messageContent = convertMessageToMap(receivedMessage);
 
         int commandId = fetchCommandIdFrom(messageContent);
@@ -238,8 +250,10 @@ public class ChatMain {
                 logInfoFor(ChatCommand.CONNECTED);
                 bdy.put("sid", ((LinkedTreeMap) messageContent.get("bdy")).get("sid"));
                 openWebSocketJson.put("bdy", bdy);
-                log.info("openWebSocketJson : {}", openWebSocketJson);
+                log.debug("openWebSocketJson : {}", openWebSocketJson);
                 session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
+
+                sendMessageToUser(session, "나님 등장!", initializeMessageSendOptions());
                 break;
             case ChatCommand.REQUEST_RECENT_CHAT:
                 logInfoFor(ChatCommand.REQUEST_RECENT_CHAT);
@@ -289,15 +303,18 @@ public class ChatMain {
             case ChatCommand.SEND_CHAT:
                 logInfoFor(ChatCommand.SEND_CHAT);
                 break;
+            case ChatCommand.MEMBER_SYNC:
+                logInfoFor(ChatCommand.MEMBER_SYNC);
+                break;
             default:
-                log.info("messageContent : {}", messageContent);
-                log.info("Unknown command : {}", command);
+                log.debug("messageContent : {}", messageContent);
+                log.debug("Unknown command : {}", command);
                 break;
         }
     }
 
     private void logInfoFor(ChatCommand command) {
-        log.info("{} : {}", command.name(), command.getValue());
+        log.debug("{} : {}", command.name(), command.getValue());
     }
 
     private void sendCommandMessage(WebSocketSession session, HashMap userInfo, String commandInputMessage) {
@@ -438,7 +455,7 @@ public class ChatMain {
     }
 
     private void handleAddOrModifyCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
-        if (commandArguments.length == CONSTANTS_OF_LENGTH_FOR_ADD_OR_MODIFY) {
+        if (commandArguments.length == 3 || commandArguments.length == 4) {
             String command = commandArguments[1].replaceAll("_", " ");
             String response = commandArguments[2].replaceAll("_", " ");
             boolean nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
@@ -498,7 +515,7 @@ public class ChatMain {
                     if (DATA.equals(contentKey)) {
                         List<LinkedTreeMap<String, Object>> dataList = content.get(DATA);
                         LinkedTreeMap<String, Object> channelInfo = dataList.get(0);
-                        log.info("search channelInfo : {}", channelInfo);
+                        log.debug("search channelInfo : {}", channelInfo);
                         return (LinkedTreeMap<String, Object>) channelInfo.get("channel");
                     }
                 }
