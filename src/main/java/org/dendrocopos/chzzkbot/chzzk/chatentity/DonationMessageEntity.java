@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -28,4 +29,11 @@ public class DonationMessageEntity {
     private String donationType;
 
     private String cost;
+
+    private LocalDateTime inputTime;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.inputTime = LocalDateTime.now();
+    }
 }

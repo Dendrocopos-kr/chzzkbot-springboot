@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -24,4 +25,11 @@ public class NormalMessageEntity {
     private String nickName;
 
     private String msg;
+
+    private LocalDateTime inputTime;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.inputTime = LocalDateTime.now();
+    }
 }
