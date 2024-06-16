@@ -13,7 +13,6 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -35,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class ChatMain {
     public static final String CONTENT = "content";
     public static final String DATA = "data";
@@ -422,7 +421,7 @@ public class ChatMain {
     }
 
     private boolean isSpecialUser(HashMap userInfo) {
-        return userInfo.get(NICKNAME).toString().equals("뮤로나 봇");
+        return userInfo.get(NICKNAME).toString().equals("뮤쪽이");
     }
 
     private boolean hasCommandPermission(HashMap userInfo) {
@@ -458,7 +457,10 @@ public class ChatMain {
         if (commandArguments.length == 3 || commandArguments.length == 4) {
             String command = commandArguments[1].replaceAll("_", " ");
             String response = commandArguments[2].replaceAll("_", " ");
-            boolean nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
+            boolean nicknameUse = false;
+            if (commandArguments.length == 4) {
+                nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
+            }
 
             messageRepository.save(CommandMessageEntity.builder()
                     .cmdStr(command)
