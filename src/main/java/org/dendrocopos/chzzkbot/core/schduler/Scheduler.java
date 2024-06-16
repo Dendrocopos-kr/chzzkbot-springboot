@@ -18,33 +18,48 @@ public class Scheduler {
     //@Scheduled(cron = "*/5 * * * * *") //5초마다
     public void checkLive() {
         log.info("Checking live scheduler");
-
         if (isChatOpen()) {
-            openChat();
+            checkAndOpenWebSocket();
         } else {
-            closeChat();
+            checkAndCloseWebSocket();
         }
 
+    }
+
+    private void checkAndOpenWebSocket() {
+        if (!isWebSocketOpen()) {
+            openChat();
+        }
+    }
+
+    private void checkAndCloseWebSocket() {
+        if (isWebSocketOpen()) {
+            closeChat();
+        }
+    }
+
+    private boolean isWebSocketOpen() {
+        return chatMain.isWebSocketOpen();
     }
 
     private boolean isChatOpen() {
         log.info("Checking chat open scheduler");
         chatMain.fetchChannelInfo();
         chatMain.fetchChannelDetail();
+        return statusIsOpen();
+    }
+
+    private boolean statusIsOpen() {
         return chatMain.getChannelInfoDetail().get(ChatMain.STATUS).equals(STATUS_OPEN);
     }
 
     private void openChat() {
-        if (!chatMain.isWebSocketOpen()) {
-            log.info("Opening chat");
-            chatMain.startWebSocket();
-        }
+        log.info("Opening chat");
+        chatMain.startWebSocket();
     }
 
     private void closeChat() {
-        if (chatMain.isWebSocketOpen()) {
-            log.info("Closing chat");
-            chatMain.stopWebSocketConnection();
-        }
+        log.info("Closing chat");
+        chatMain.stopWebSocketConnection();
     }
 }

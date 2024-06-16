@@ -39,9 +39,9 @@ security:
   allowed-uris: /,/admin,/test,/command
 logging:
   level:
-    org.springframework.messaging: info
-    org.springframework.web.socket: info
-    liquibase: info
+    org.springframework.messaging: error
+    org.springframework.web.socket: error
+    liquibase: error
 chzzk:
   ChannelName: 뮤로나
   #ChannelId: 448acb33aff5339a08540f0d9e8e2652
