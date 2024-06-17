@@ -10,8 +10,6 @@ public class HomeController {
 
     @GetMapping("/index")
     public String home(Model model) {
-        model.addAttribute("title", "Home");
-        model.addAttribute("message", "this is a home page");
         return "index.html";
     }
 
