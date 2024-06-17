@@ -277,12 +277,22 @@ public class ChatMain {
                 break;
             case ChatCommand.DONATION:
                 log.info("DONATION : {}", ChatCommand.DONATION.getValue());
-                donationMessageRepository.save(DonationMessageEntity.builder()
-                        .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
-                        .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
-                        .donationType((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("donationType").toString())
-                        .cost((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString())
-                        .build());
+                try {
+                    HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
+                    String donationType = null;
+                    if (extras.get("donationType") != null) {
+                        donationType = extras.get("donationType").toString();
+                    }
+                    
+                    donationMessageRepository.save(DonationMessageEntity.builder()
+                            .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
+                            .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
+                            .donationType(donationType)
+                            .cost((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString())
+                            .build());
+                } catch (Exception e) {
+                    log.info("{}", e.getMessage());
+                }
                 break;
             case ChatCommand.KICK:
                 logInfoFor(ChatCommand.KICK);

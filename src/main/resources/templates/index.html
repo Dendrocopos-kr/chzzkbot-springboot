@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="kr">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Home Page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
 </head>
 <body>
-뮤로나바보
+<h1 th:text="${title}">Welcome to Our Website</h1>
+<p th:text="${message}">This is a welcome message.</p>
 </body>
 </html>
