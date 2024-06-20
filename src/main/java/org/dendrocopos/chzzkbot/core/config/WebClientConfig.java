@@ -12,15 +12,16 @@ import reactor.core.publisher.Mono;
 public class WebClientConfig {
 
     @Bean
-    public WebClient webClient() { return WebClient.builder()
-            .filter(logRequest())
-            .filter(logResponse())
-            .build();
+    public WebClient webClient() {
+        return WebClient.builder()
+                .filter(logRequest())
+                .filter(logResponse())
+                .build();
     }
 
     private ExchangeFilterFunction logRequest() {
         return (request, next) -> {
-            log.info("Request: {} {}", request.method(), request.url());
+            log.debug("Request: {} {}", request.method(), request.url());
             request.headers().forEach((name, values) -> values.forEach(value -> log.info(name, value)));
             return next.exchange(request);
         };
@@ -28,7 +29,7 @@ public class WebClientConfig {
 
     private ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            log.info("Response: {}", (clientResponse.statusCode()));
+            log.debug("Response: {}", (clientResponse.statusCode()));
             return Mono.just(clientResponse);
         });
     }

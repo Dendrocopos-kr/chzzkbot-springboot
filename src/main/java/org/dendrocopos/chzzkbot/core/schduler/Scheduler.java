@@ -17,7 +17,7 @@ public class Scheduler {
     @Scheduled(cron = "0 * * * * *") // 1분마다
     //@Scheduled(cron = "*/5 * * * * *") //5초마다
     public void checkLive() {
-        log.info("Checking live scheduler");
+        log.debug("Checking live scheduler");
         if (isChatOpen()) {
             checkAndOpenWebSocket();
         } else {
@@ -43,7 +43,7 @@ public class Scheduler {
     }
 
     private boolean isChatOpen() {
-        log.info("Checking chat open scheduler");
+        log.debug("Checking chat open scheduler");
         chatMain.fetchChannelInfo();
         chatMain.fetchChannelDetail();
         return statusIsOpen();
