@@ -34,9 +34,10 @@ spring:
     password: ${spring.datasource.password}
     clear-checksums: false
 server:
-  port: 8080
+  port: 8180
 security:
-  allowed-uris: /,/admin,/test,/command
+  allowed-uris: /,/test
+  authenticated-uris: /admin,/command
 logging:
   level:
     org.springframework.messaging: debug

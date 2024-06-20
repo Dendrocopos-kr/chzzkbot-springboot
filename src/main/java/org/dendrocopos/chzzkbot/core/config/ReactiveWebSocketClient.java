@@ -9,7 +9,7 @@ import org.springframework.web.reactive.socket.client.WebSocketClient;
 public class ReactiveWebSocketClient {
 
     @Bean
-    public WebSocketClient webSocketClient(){
+    public WebSocketClient webSocketClient() {
         return new ReactorNettyWebSocketClient();
     }
 

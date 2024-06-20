@@ -25,15 +25,19 @@ public class WebSecurityConfig {
     private final AccessDeniedHandler accessDeniedHandler;
     @Value("${security.allowed-uris}")
     private String[] allowedUris;
+    @Value("${security.authenticated-uris}")
+    private String[] getAllowedUris;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable
                 )
-                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
-                        .requestMatchers(allowedUris).permitAll()
-                        .anyRequest().permitAll()
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
+                        authorizationManagerRequestMatcherRegistry
+                                .requestMatchers(allowedUris).permitAll()
+                                .requestMatchers(getAllowedUris).authenticated()
+                                .anyRequest().denyAll()
                 )
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll
                 )
