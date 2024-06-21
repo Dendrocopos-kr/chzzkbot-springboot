@@ -36,4 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /logs/
-/src/main/java/org/dendrocopos/chzzkbot/chzzk/nid/
+/src/main/java/org/dendrocopos/chzzkbot/chzzk/nid/*

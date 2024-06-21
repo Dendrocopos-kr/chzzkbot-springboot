@@ -1,5 +1,6 @@
 package org.dendrocopos.chzzkbot.chzzk.chatservice;
 
+import lombok.RequiredArgsConstructor;
 import org.dendrocopos.chzzkbot.chzzk.nid.nid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Service
+@RequiredArgsConstructor
 public class ChzzkServices {
 
     private final WebClient webClient;
@@ -21,10 +23,6 @@ public class ChzzkServices {
     String applicationVersion;
     @Value("${user.agent}")
     String agent;
-
-    public ChzzkServices(WebClient webClient) {
-        this.webClient = webClient;
-    }
 
     public Mono<String> reqChzzk(String path) {
         return webClient.get()

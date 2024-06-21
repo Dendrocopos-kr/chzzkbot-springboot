@@ -276,14 +276,18 @@ public class ChatMain {
                 sendCommandMessage(session, gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class), ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString());
                 break;
             case ChatCommand.DONATION:
-                log.info("DONATION : {}", ChatCommand.DONATION.getValue());
+                log.info("DONATION :{} : {} : {}",
+                        ChatCommand.DONATION.getValue(),
+                        (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
+                        , ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg")
+                );
                 try {
                     HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
                     String donationType = null;
                     if (extras.get("donationType") != null) {
                         donationType = extras.get("donationType").toString();
                     }
-                    
+
                     donationMessageRepository.save(DonationMessageEntity.builder()
                             .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
                             .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
@@ -291,7 +295,7 @@ public class ChatMain {
                             .cost((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString())
                             .build());
                 } catch (Exception e) {
-                    log.info("{}", e.getMessage());
+                    log.info("error : {}", e.getMessage());
                 }
                 break;
             case ChatCommand.KICK:
