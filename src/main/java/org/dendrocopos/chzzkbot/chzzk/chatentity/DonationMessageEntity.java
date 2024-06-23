@@ -24,6 +24,7 @@ public class DonationMessageEntity {
 
     private String nickName;
 
+    @Column(columnDefinition = "TEXT")
     private String msg;
 
     private String donationType;

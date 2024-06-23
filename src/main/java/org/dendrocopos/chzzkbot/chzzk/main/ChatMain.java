@@ -79,6 +79,7 @@ public class ChatMain {
     @Value("${chzzk.ChannelName}")
     private String channelName;
     private boolean isWebSocketOpen = false;
+    private int serverId;
 
     public boolean isWebSocketOpen() {
         return isWebSocketOpen;
@@ -86,63 +87,6 @@ public class ChatMain {
 
     //@EventListener(ApplicationReadyEvent.class)
     public void startWebSocket() {
-        channelInfo = fetchChannelInfo();
-        myInfo = fetchUserStatus();
-        chatChannelInfo = fetchChatChannelInfo();
-        channelInfoDetail = fetchChannelDetail();
-        tokenInfo = fetchToken();
-        establishWebSocketConnection();
-    }
-
-    public LinkedTreeMap fetchChannelDetail() {
-        String searchChannelDteail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
-        HashMap channelDteail = gson.fromJson(searchChannelDteail, HashMap.class);
-        if (channelDteail.get("code").toString().equals(SUCCESS_CODE)) {
-            //log.debug("searchChannelInfoDetail : {}", channelDteail.get("content"));
-            return channelInfoDetail = ((LinkedTreeMap) channelDteail.get("content"));
-        }
-        return null;
-    }
-
-    public LinkedTreeMap fetchChannelInfo() {
-        String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
-                .block();
-        //log.debug("channelSearch : {}", searchChannelInfo);
-        HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
-        return channelInfo = processChannelSearch(searchChannelData);
-    }
-
-    private LinkedTreeMap fetchUserStatus() {
-        String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
-        HashMap myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
-        if (myInfoContent.get("code").toString().equals(SUCCESS_CODE)) {
-            log.debug("search myInfo : {}", myInfoContent.get("content"));
-            return ((LinkedTreeMap) myInfoContent.get("content"));
-        }
-        return null;
-    }
-
-    private LinkedTreeMap fetchChatChannelInfo() {
-        String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
-        HashMap searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
-        if (searchChatChannel.get("code").toString().equals(SUCCESS_CODE)) {
-            log.debug("search chatChannelInfo : {}", searchChatChannel.get("content"));
-            return ((LinkedTreeMap) searchChatChannel.get("content"));
-        }
-        return null;
-    }
-
-    private LinkedTreeMap fetchToken() {
-        String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
-        HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
-        if (searchToken.get("code").toString().equals(SUCCESS_CODE)) {
-            log.debug("search tokenInfo : {}", searchToken.get("content"));
-            return ((LinkedTreeMap) searchToken.get("content"));
-        }
-        return null;
-    }
-
-    private void establishWebSocketConnection() {
         openWebSocketJson = new HashMap<>();
         bdy = new HashMap<>();
         bdy.put("accTkn", tokenInfo.get("accessToken"));
@@ -162,6 +106,50 @@ public class ChatMain {
         }
     }
 
+    public void fetchChannelDetail() {
+        String searchChannelDteail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
+        HashMap channelDteail = gson.fromJson(searchChannelDteail, HashMap.class);
+        if (channelDteail.get("code").toString().equals(SUCCESS_CODE)) {
+            //log.debug("searchChannelInfoDetail : {}", channelDteail.get("content"));
+            channelInfoDetail = ((LinkedTreeMap) channelDteail.get("content"));
+        }
+    }
+
+    public void fetchChannelInfo() {
+        String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
+                .block();
+        log.debug("channelSearch : {}", searchChannelInfo);
+        HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
+        channelInfo = processChannelSearch(searchChannelData);
+    }
+
+    public void fetchUserStatus() {
+        String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
+        HashMap myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
+        if (myInfoContent.get("code").toString().equals(SUCCESS_CODE)) {
+            log.debug("search myInfo : {}", myInfoContent.get("content"));
+            myInfo = ((LinkedTreeMap) myInfoContent.get("content"));
+        }
+    }
+
+    public void fetchChatChannelInfo() {
+        String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
+        HashMap searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
+        if (searchChatChannel.get("code").toString().equals(SUCCESS_CODE)) {
+            log.debug("search chatChannelInfo : {}", searchChatChannel.get("content"));
+            chatChannelInfo = ((LinkedTreeMap) searchChatChannel.get("content"));
+        }
+    }
+
+    public void fetchToken() {
+        String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
+        HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
+        if (searchToken.get("code").toString().equals(SUCCESS_CODE)) {
+            log.debug("search tokenInfo : {}", searchToken.get("content"));
+            tokenInfo = ((LinkedTreeMap) searchToken.get("content"));
+        }
+    }
+
     // 웹소켓 연결 종료 코드
     public void stopWebSocketConnection() {
         if (webSocketSessionDisposable != null && !webSocketSessionDisposable.isDisposed()) {
@@ -170,9 +158,18 @@ public class ChatMain {
         isWebSocketOpen = false;
     }
 
+    public boolean isServerIdChange() {
+        if (this.serverId == 0) {
+            return true;
+        }
+        int checkingServerId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
+                .reduce(0, Integer::sum)) % 9 + 1;
+        return checkingServerId == this.serverId;
+    }
+
     public void processSendMessage(String message) {
 
-        int serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
+        serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
                 .reduce(0, Integer::sum)) % 9 + 1;
         HashMap pongCmd = new HashMap<>();
         pongCmd.put("cmd", ChatCommand.PONG.getValue());
@@ -269,10 +266,14 @@ public class ChatMain {
                         (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
                         , ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg")
                 );
-                normalMessageRepository.save(NormalMessageEntity.builder()
-                        .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
-                        .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
-                        .build());
+                try {
+                    normalMessageRepository.save(NormalMessageEntity.builder()
+                            .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
+                            .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
+                            .build());
+                } catch (Exception e) {
+                    log.info("error : {}", e.getMessage());
+                }
                 sendCommandMessage(session, gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class), ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString());
                 break;
             case ChatCommand.DONATION:
@@ -404,19 +405,19 @@ public class ChatMain {
 
     private String getFormattedUptimeMessage(Duration duration) {
         StringBuilder upTimeMessage = new StringBuilder();
-        if (duration.toDays() > 0) {
-            upTimeMessage.append(duration.toDays()).append("일 ");
-        }
-        if (duration.toHours() > 0) {
-            upTimeMessage.append(duration.toHours() % 24).append("시간 ");
-        }
-        if (duration.toMinutes() > 0) {
-            upTimeMessage.append(duration.toMinutes() % 60).append("분 ");
-        }
-        if (duration.getSeconds() > 0) {
-            upTimeMessage.append(duration.getSeconds() % 60).append("초 방송중");
-        }
+
+        appendTimeUnit(upTimeMessage, duration.toDays(), "일 ");
+        appendTimeUnit(upTimeMessage, duration.toHours() % 24, "시간 ");
+        appendTimeUnit(upTimeMessage, duration.toMinutes() % 60, "분 ");
+        appendTimeUnit(upTimeMessage, duration.getSeconds() % 60, "초 방송 중");
+
         return upTimeMessage.toString();
+    }
+
+    private void appendTimeUnit(StringBuilder sb, long timeUnit, String unitName) {
+        if (timeUnit > 0) {
+            sb.append(timeUnit).append(unitName);
+        }
     }
 
     private String getCommandMessage(String command, List<CommandMessageEntity> commandList) {

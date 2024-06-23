@@ -24,6 +24,7 @@ public class NormalMessageEntity {
 
     private String nickName;
 
+    @Column(columnDefinition = "TEXT")
     private String msg;
 
     private LocalDateTime inputTime;

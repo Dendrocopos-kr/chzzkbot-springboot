@@ -23,7 +23,6 @@ public class Scheduler {
         } else {
             checkAndCloseWebSocket();
         }
-
     }
 
     private void checkAndOpenWebSocket() {
@@ -45,7 +44,13 @@ public class Scheduler {
     private boolean isChatOpen() {
         log.debug("Checking chat open scheduler");
         chatMain.fetchChannelInfo();
+        chatMain.fetchUserStatus();
+        chatMain.fetchChatChannelInfo();
         chatMain.fetchChannelDetail();
+        chatMain.fetchToken();
+        if (!chatMain.isServerIdChange()) {
+            closeChat();
+        }
         return statusIsOpen();
     }
 
