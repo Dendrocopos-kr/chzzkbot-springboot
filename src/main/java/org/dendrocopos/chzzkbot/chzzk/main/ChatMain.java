@@ -66,6 +66,8 @@ public class ChatMain {
     private final NormalMessageRepository normalMessageRepository;
     @Getter
     public LinkedTreeMap channelInfoDetail;
+    @Value("${chzzk.bot.closingMessage}")
+    public String closingMessage;
     HashMap<String, Object> openWebSocketJson = new HashMap<>();
     HashMap<String, Object> bdy = new HashMap<>();
     private Disposable webSocketSessionDisposable;
@@ -78,6 +80,8 @@ public class ChatMain {
     private String sid;
     @Value("${chzzk.ChannelName}")
     private String channelName;
+    @Value("${chzzk.bot.openingMessage}")
+    private String announcementMessage;
     private boolean isWebSocketOpen = false;
     private int serverId;
 
@@ -87,23 +91,30 @@ public class ChatMain {
 
     //@EventListener(ApplicationReadyEvent.class)
     public void startWebSocket() {
-        openWebSocketJson = new HashMap<>();
-        bdy = new HashMap<>();
-        bdy.put("accTkn", tokenInfo.get("accessToken"));
-        bdy.put("auth", "SEND");
-        bdy.put("devType", 2001);
-        bdy.put("uid", myInfo.get("userIdHash"));
-        openWebSocketJson.put("bdy", bdy);
+        Map<String, Object> body = createWebSocketBody();
+        String jsonResponse = gson.toJson(body);
+        try {
+            processSendMessage(jsonResponse);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private Map<String, Object> createWebSocketBody() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("accTkn", tokenInfo.get("accessToken"));
+        body.put("auth", "SEND");
+        body.put("devType", 2001);
+        body.put("uid", myInfo.get("userIdHash"));
+
+        HashMap<String, Object> openWebSocketJson = new HashMap<>();
+        openWebSocketJson.put("bdy", body);
         openWebSocketJson.put("cid", chatChannelInfo.get("chatChannelId"));
         openWebSocketJson.put("svcid", "game");
         openWebSocketJson.put("ver", "2");
         openWebSocketJson.put("tid", 1);
         openWebSocketJson.put("cmd", 100);
-        try {
-            processSendMessage(gson.toJson(openWebSocketJson));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
+        return openWebSocketJson;
     }
 
     public void fetchChannelDetail() {
@@ -167,32 +178,28 @@ public class ChatMain {
         return checkingServerId == this.serverId;
     }
 
-    public void processSendMessage(String message) {
-
-        serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
+    private int calculateServerId() {
+        return Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
                 .reduce(0, Integer::sum)) % 9 + 1;
-        HashMap pongCmd = new HashMap<>();
+    }
+
+    private HashMap<String, Object> constructPongCmd() {
+        HashMap<String, Object> pongCmd = new HashMap<>();
         pongCmd.put("cmd", ChatCommand.PONG.getValue());
         pongCmd.put("ver", "2");
+        return pongCmd;
+    }
 
+    public void processSendMessage(String message) {
+        serverId = calculateServerId();
+        String uriString = "wss://kr-ss" + serverId + ".chat.naver.com/chat";
         webSocketSessionDisposable = websocketclient.execute(
-                URI.create("wss://kr-ss" + serverId + ".chat.naver.com/chat"),
+                URI.create(uriString),
                 session -> {
                     isWebSocketOpen = true;
                     return Flux.merge(
-                            // Periodic message sending every 20 seconds
-                            session.send(Mono.just(session.textMessage(message))) // 연결 설정 후 초기 메시지 전송
-                                    .thenMany(
-                                            Flux.interval(Duration.ofSeconds(20)) // Interval setup
-                                                    .flatMap(time -> session.send(
-                                                            Mono.just(session.textMessage(gson.toJson(pongCmd))))
-                                                    ) // Message sending every 20 seconds
-
-                                    ),
-                            // Handling received messages from server
-                            session.receive() // 메시지 받기
-                                    .map(WebSocketMessage::getPayloadAsText)
-                                    .doOnNext(s -> processReceivedMessage(session, s)) // 받은 메시지 처리하기
+                            getPeriodicMessageFlux(session, message),
+                            getReceivedMessageFlux(session)
                     ).doOnCancel(() -> {
                         // this block will be executed when the subscription is cancelled
                         sendMessageToUser(session, "나님도 자러갈게...", initializeMessageSendOptions());
@@ -200,6 +207,22 @@ public class ChatMain {
                     }).then();
                 }
         ).subscribe();
+    }
+
+    private Flux<Void> getPeriodicMessageFlux(WebSocketSession session, String message) {
+        return session.send(Mono.just(session.textMessage(message))) // 연결 설정 후 초기 메시지 전송
+                .thenMany(
+                        Flux.interval(Duration.ofSeconds(20)) // Interval setup
+                                .flatMap(time -> session.send(
+                                        Mono.just(session.textMessage(gson.toJson(constructPongCmd())))
+                                ))
+                );
+    }
+
+    private Flux<String> getReceivedMessageFlux(WebSocketSession session) {
+        return session.receive() // 메시지 받기
+                .map(WebSocketMessage::getPayloadAsText)
+                .doOnNext(s -> processReceivedMessage(session, s)); // 받은 메시지 처리하기
     }
 
     public void processReceivedMessage(WebSocketSession session, String receivedMessage) {
@@ -231,16 +254,21 @@ public class ChatMain {
     }
 
     private void performRequestBasedOn(Integer command, Map<String, Object> messageContent, WebSocketSession session) {
-
         switch (ChatCommand.getCommandValue(command)) {
             case ChatCommand.PING:
-                logInfoFor(ChatCommand.PING);
-                break;
             case ChatCommand.PONG:
-                logInfoFor(ChatCommand.PONG);
-                break;
             case ChatCommand.CONNECT:
-                logInfoFor(ChatCommand.CONNECT);
+            case ChatCommand.REQUEST_RECENT_CHAT:
+            case ChatCommand.RECENT_CHAT:
+            case ChatCommand.EVENT:
+            case ChatCommand.KICK:
+            case ChatCommand.BLOCK:
+            case ChatCommand.BLIND:
+            case ChatCommand.NOTICE:
+            case ChatCommand.PENALTY:
+            case ChatCommand.SEND_CHAT:
+            case ChatCommand.MEMBER_SYNC:
+                logInfoFor((ChatCommand) ChatCommand.getCommandValue(command));
                 break;
             case ChatCommand.CONNECTED:
                 logInfoFor(ChatCommand.CONNECTED);
@@ -248,83 +276,94 @@ public class ChatMain {
                 openWebSocketJson.put("bdy", bdy);
                 log.debug("openWebSocketJson : {}", openWebSocketJson);
                 session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
-
-                sendMessageToUser(session, "나님 등장!", initializeMessageSendOptions());
-                break;
-            case ChatCommand.REQUEST_RECENT_CHAT:
-                logInfoFor(ChatCommand.REQUEST_RECENT_CHAT);
-                break;
-            case ChatCommand.RECENT_CHAT:
-                logInfoFor(ChatCommand.RECENT_CHAT);
-                break;
-            case ChatCommand.EVENT:
-                logInfoFor(ChatCommand.EVENT);
+                sendMessageToUser(session, announcementMessage, initializeMessageSendOptions());
                 break;
             case ChatCommand.CHAT:
-                log.info("CHAT :{} : {} : {}",
-                        ChatCommand.CHAT.getValue(),
-                        (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
-                        , ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg")
-                );
-                try {
-                    normalMessageRepository.save(NormalMessageEntity.builder()
-                            .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
-                            .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
-                            .build());
-                } catch (Exception e) {
-                    log.info("error : {}", e.getMessage());
-                }
-                sendCommandMessage(session, gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class), ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString());
+                handleChatCommand(messageContent, session);
                 break;
             case ChatCommand.DONATION:
-                log.info("DONATION :{} : {} : {}",
-                        ChatCommand.DONATION.getValue(),
-                        (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname")
-                        , ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg")
-                );
-                try {
-                    HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
-                    String donationType = null;
-                    if (extras.get("donationType") != null) {
-                        donationType = extras.get("donationType").toString();
-                    }
-
-                    donationMessageRepository.save(DonationMessageEntity.builder()
-                            .nickName((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class)).get("nickname").toString())
-                            .msg(((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString())
-                            .donationType(donationType)
-                            .cost((gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString())
-                            .build());
-                } catch (Exception e) {
-                    log.info("error : {}", e.getMessage());
-                }
-                break;
-            case ChatCommand.KICK:
-                logInfoFor(ChatCommand.KICK);
-                break;
-            case ChatCommand.BLOCK:
-                logInfoFor(ChatCommand.BLOCK);
-                break;
-            case ChatCommand.BLIND:
-                logInfoFor(ChatCommand.BLIND);
-                break;
-            case ChatCommand.NOTICE:
-                logInfoFor(ChatCommand.NOTICE);
-                break;
-            case ChatCommand.PENALTY:
-                logInfoFor(ChatCommand.PENALTY);
-                break;
-            case ChatCommand.SEND_CHAT:
-                logInfoFor(ChatCommand.SEND_CHAT);
-                break;
-            case ChatCommand.MEMBER_SYNC:
-                logInfoFor(ChatCommand.MEMBER_SYNC);
+                handleDonationCommand(messageContent);
                 break;
             default:
                 log.debug("messageContent : {}", messageContent);
                 log.debug("Unknown command : {}", command);
                 break;
         }
+    }
+
+    private void handleChatCommand(Map<String, Object> messageContent, WebSocketSession session) {
+        logChatOrDonationInfo(ChatCommand.CHAT, messageContent);
+
+        try {
+            normalMessageRepository.save(buildNormalMessageEntity(messageContent));
+        } catch (Exception e) {
+            log.info("error : {}", e.getMessage());
+        }
+
+        sendCommandMessage(session, getProfile(messageContent), getMsg(messageContent));
+    }
+
+    private void handleDonationCommand(Map<String, Object> messageContent) {
+        logChatOrDonationInfo(ChatCommand.DONATION, messageContent);
+
+        try {
+            donationMessageRepository.save(buildDonationMessageEntity(messageContent));
+        } catch (Exception e) {
+            log.info("error : {}", e.getMessage());
+        }
+    }
+
+    private void logChatOrDonationInfo(ChatCommand command, Map<String, Object> messageContent) {
+        log.info("{} :{} : {} : {}",
+                command.name(),
+                command.getValue(),
+                getNickname(messageContent),
+                getMsg(messageContent)
+        );
+    }
+
+    private NormalMessageEntity buildNormalMessageEntity(Map<String, Object> messageContent) {
+        return NormalMessageEntity.builder()
+                .nickName(getNickname(messageContent))
+                .msg(getMsg(messageContent))
+                .build();
+    }
+
+    private DonationMessageEntity buildDonationMessageEntity(Map<String, Object> messageContent) {
+        return DonationMessageEntity.builder()
+                .nickName(getNickname(messageContent))
+                .msg(getMsg(messageContent))
+                .donationType(getDonationType(messageContent))
+                .cost(getCost(messageContent))
+                .build();
+    }
+
+    //methods to extract message content data
+    private HashMap<String, Object> getProfile(Map<String, Object> messageContent) {
+        return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class));
+    }
+
+    private String getNickname(Map<String, Object> messageContent) {
+        return getProfile(messageContent).get("nickname").toString();
+    }
+
+    private String getMsg(Map<String, Object> messageContent) {
+        return ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString();
+    }
+
+    private String getDonationType(Map<String, Object> messageContent) {
+        HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
+
+        String donationType = null;
+        if (extras.get("donationType") != null) {
+            donationType = extras.get("donationType").toString();
+        }
+
+        return donationType;
+    }
+
+    private String getCost(Map<String, Object> messageContent) {
+        return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString();
     }
 
     private void logInfoFor(ChatCommand command) {

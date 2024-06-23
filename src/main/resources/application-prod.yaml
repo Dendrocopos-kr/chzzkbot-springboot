@@ -44,6 +44,9 @@ logging:
     org.springframework.web.socket: error
     liquibase: error
 chzzk:
+  bot:
+    openingMessage: "나님 등장!"
+    closingMessage: "나님도 자러갈게..."
   ChannelName: 뮤로나
   URL:
     chzzkBaseURL: https://api.chzzk.naver.com/
