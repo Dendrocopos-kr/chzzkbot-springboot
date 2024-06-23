@@ -66,8 +66,8 @@ public class ChatMain {
     private final NormalMessageRepository normalMessageRepository;
     @Getter
     public LinkedTreeMap channelInfoDetail;
-    HashMap<String, Object> openWebSocketJson = new HashMap();
-    HashMap<String, Object> bdy = new HashMap();
+    HashMap<String, Object> openWebSocketJson = new HashMap<>();
+    HashMap<String, Object> bdy = new HashMap<>();
     private Disposable webSocketSessionDisposable;
     private LinkedTreeMap channelInfo;
     private LinkedTreeMap chatChannelInfo;
@@ -143,8 +143,8 @@ public class ChatMain {
     }
 
     private void establishWebSocketConnection() {
-        openWebSocketJson = new HashMap();
-        bdy = new HashMap();
+        openWebSocketJson = new HashMap<>();
+        bdy = new HashMap<>();
         bdy.put("accTkn", tokenInfo.get("accessToken"));
         bdy.put("auth", "SEND");
         bdy.put("devType", 2001);
@@ -166,15 +166,15 @@ public class ChatMain {
     public void stopWebSocketConnection() {
         if (webSocketSessionDisposable != null && !webSocketSessionDisposable.isDisposed()) {
             webSocketSessionDisposable.dispose();
-            isWebSocketOpen = false;
         }
+        isWebSocketOpen = false;
     }
 
     public void processSendMessage(String message) {
 
         int serverId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
                 .reduce(0, Integer::sum)) % 9 + 1;
-        HashMap pongCmd = new HashMap();
+        HashMap pongCmd = new HashMap<>();
         pongCmd.put("cmd", ChatCommand.PONG.getValue());
         pongCmd.put("ver", "2");
 
@@ -198,7 +198,7 @@ public class ChatMain {
                                     .doOnNext(s -> processReceivedMessage(session, s)) // 받은 메시지 처리하기
                     ).doOnCancel(() -> {
                         // this block will be executed when the subscription is cancelled
-                        sendMessageToUser(session, "나님 자러갈게...", initializeMessageSendOptions());
+                        sendMessageToUser(session, "나님도 자러갈게...", initializeMessageSendOptions());
                         isWebSocketOpen = false;
                     }).then();
                 }
@@ -385,6 +385,7 @@ public class ChatMain {
         List<String> filteredCommands = commandList.stream()
                 .map(CommandMessageEntity::getCmdStr)
                 .filter(s -> !s.equals(COMMAND))
+                .filter(s -> s.charAt(0) == '!')
                 .toList();
         sendMessageToUser(session, filteredCommands.isEmpty() ? "No commands are available." : String.join(", ", filteredCommands), messageSendOptionsReference);
     }
