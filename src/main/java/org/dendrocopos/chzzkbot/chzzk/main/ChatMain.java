@@ -32,32 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChatMain {
-    public static final String CONTENT = "content";
-    public static final String DATA = "data";
-    public static final String NICKNAME = "nickname";
-    public static final String USER_ROLE_CODE = "userRoleCode";
-    public static final String COMMAND_ADD = "!추가";
-    public static final String COMMAND_MODIFY = "!수정";
-    public static final String COMMAND_DELETE = "!삭제";
-    public static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
-    public static final String SUCCESS_CODE = "200.0";
-    public static final String COMMAND_ENTITY_TRUE = "true";
-    public static final String COMMAND = "!명령어";
-    public static final String UPTIME = "!업타임";
-    public static final String SVCID_KEY = "svcid";
-    public static final String CMD_KEY = "cmd";
-    public static final String CID_KEY = "cid";
-    public static final String BDY_KEY = "bdy";
-    public static final String SID_KEY = "sid";
-    public static final String DOT = "\\.";
-    public static final String STATUS = "status";
-    public static final String OPEN_DATE = "openDate";
-    public static final String CLOSE_DATE = "closeDate";
-    public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
     private final Gson gson = new Gson();
@@ -226,7 +206,7 @@ public class ChatMain {
     }
 
     public void processReceivedMessage(WebSocketSession session, String receivedMessage) {
-        log.debug("Received WebSocket message: {}", receivedMessage);
+        log.info("Received WebSocket message: {}", receivedMessage);
         HashMap<String, Object> messageContent = convertMessageToMap(receivedMessage);
 
         int commandId = fetchCommandIdFrom(messageContent);

@@ -19,8 +19,16 @@
         </rollingPolicy>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+    <root level="DEBUG">
         <appender-ref ref="FILE-ROLLING"/>
     </root>
+
+    <logger name="org.springframework" level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.dendrocopos.chzzkbot" level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
 </configuration>

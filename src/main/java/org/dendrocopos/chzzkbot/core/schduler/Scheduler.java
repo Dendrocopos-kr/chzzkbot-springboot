@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.STATUS;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -55,7 +57,7 @@ public class Scheduler {
     }
 
     private boolean statusIsOpen() {
-        return chatMain.getChannelInfoDetail().get(ChatMain.STATUS).equals(STATUS_OPEN);
+        return chatMain.getChannelInfoDetail().get(STATUS).equals(STATUS_OPEN);
     }
 
     private void openChat() {
