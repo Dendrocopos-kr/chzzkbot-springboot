@@ -60,6 +60,8 @@ public class ChatMain {
     private String sid;
     @Value("${chzzk.ChannelName}")
     private String channelName;
+    @Value("${chzzk.bot.name}")
+    private String botName;
     @Value("${chzzk.bot.openingMessage}")
     private String announcementMessage;
     private boolean isWebSocketOpen = false;
@@ -304,6 +306,7 @@ public class ChatMain {
 
     private NormalMessageEntity buildNormalMessageEntity(Map<String, Object> messageContent) {
         return NormalMessageEntity.builder()
+                .uid(getUid(messageContent))
                 .nickName(getNickname(messageContent))
                 .msg(getMsg(messageContent))
                 .build();
@@ -311,6 +314,7 @@ public class ChatMain {
 
     private DonationMessageEntity buildDonationMessageEntity(Map<String, Object> messageContent) {
         return DonationMessageEntity.builder()
+                .uid(getUid(messageContent))
                 .nickName(getNickname(messageContent))
                 .msg(getMsg(messageContent))
                 .donationType(getDonationType(messageContent))
@@ -323,7 +327,14 @@ public class ChatMain {
         return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class));
     }
 
+    private String getUid(Map<String, Object> messageContent) {
+        return ((LinkedTreeMap) messageContent.get("bdy")).get("uid").toString();
+    }
+
     private String getNickname(Map<String, Object> messageContent) {
+        if (getProfile(messageContent) == null) {
+            return getUid(messageContent);
+        }
         return getProfile(messageContent).get("nickname").toString();
     }
 
@@ -456,7 +467,7 @@ public class ChatMain {
     }
 
     private boolean isSpecialUser(HashMap userInfo) {
-        return userInfo.get(NICKNAME).toString().equals("뮤쪽이");
+        return userInfo.get(NICKNAME).toString().equals(botName);
     }
 
     private boolean hasCommandPermission(HashMap userInfo) {

@@ -19,6 +19,8 @@ public class AttendanceMessageEntity {
     @Id
     private String cmdStr;
 
+    private String uid;
+    
     private boolean nickNameUse;
 
     private boolean attendanceAt;

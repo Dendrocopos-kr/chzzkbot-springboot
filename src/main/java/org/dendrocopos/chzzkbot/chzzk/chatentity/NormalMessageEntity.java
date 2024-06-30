@@ -22,6 +22,8 @@ public class NormalMessageEntity {
     @SequenceGenerator(name = "seq_normal_chat", sequenceName = "normarl_sequence", allocationSize = 1)
     private BigDecimal seq;
 
+    private String uid;
+
     private String nickName;
 
     @Column(columnDefinition = "TEXT")

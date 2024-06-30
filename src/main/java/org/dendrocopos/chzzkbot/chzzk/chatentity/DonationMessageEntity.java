@@ -22,6 +22,8 @@ public class DonationMessageEntity {
     @SequenceGenerator(name = "donation_seq", sequenceName = "donation_sequence")
     private BigDecimal seq;
 
+    private String uid;
+
     private String nickName;
 
     @Column(columnDefinition = "TEXT")
