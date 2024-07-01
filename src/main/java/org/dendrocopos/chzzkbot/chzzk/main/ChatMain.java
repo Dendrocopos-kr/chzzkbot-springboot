@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.DonationMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.NormalMessageEntity;
 import org.dendrocopos.chzzkbot.chzzk.chatenum.ChatCommand;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
+import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
+import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
-import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
-import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -26,13 +24,14 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
+import static org.dendrocopos.chzzkbot.chzzk.utils.EntityUtils.*;
+import static org.dendrocopos.chzzkbot.core.utils.StringUtils.appendTimeUnit;
 
 @Slf4j
 @Component
@@ -42,8 +41,8 @@ public class ChatMain {
     private final ChzzkServices chzzkServices;
     private final Gson gson = new Gson();
     private final CommandMessageRepository messageRepository;
-    private final DonationMessageRepository donationMessageRepository;
-    private final NormalMessageRepository normalMessageRepository;
+    private final AuthorizationManager authorizationManager;
+    private final MessageService messageService;
     @Getter
     public LinkedTreeMap channelInfoDetail;
     @Value("${chzzk.bot.closingMessage}")
@@ -277,7 +276,7 @@ public class ChatMain {
         logChatOrDonationInfo(ChatCommand.CHAT, messageContent);
 
         try {
-            normalMessageRepository.save(buildNormalMessageEntity(messageContent));
+            messageService.saveNormalMessage(messageContent);
         } catch (Exception e) {
             log.info("error : {}", e.getMessage());
         }
@@ -289,7 +288,7 @@ public class ChatMain {
         logChatOrDonationInfo(ChatCommand.DONATION, messageContent);
 
         try {
-            donationMessageRepository.save(buildDonationMessageEntity(messageContent));
+            messageService.saveDonationMessage(messageContent);
         } catch (Exception e) {
             log.info("error : {}", e.getMessage());
         }
@@ -304,72 +303,19 @@ public class ChatMain {
         );
     }
 
-    private NormalMessageEntity buildNormalMessageEntity(Map<String, Object> messageContent) {
-        return NormalMessageEntity.builder()
-                .uid(getUid(messageContent))
-                .nickName(getNickname(messageContent))
-                .msg(getMsg(messageContent))
-                .build();
-    }
-
-    private DonationMessageEntity buildDonationMessageEntity(Map<String, Object> messageContent) {
-        return DonationMessageEntity.builder()
-                .uid(getUid(messageContent))
-                .nickName(getNickname(messageContent))
-                .msg(getMsg(messageContent))
-                .donationType(getDonationType(messageContent))
-                .cost(getCost(messageContent))
-                .build();
-    }
-
-    //methods to extract message content data
-    private HashMap<String, Object> getProfile(Map<String, Object> messageContent) {
-        return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("profile"), HashMap.class));
-    }
-
-    private String getUid(Map<String, Object> messageContent) {
-        return ((LinkedTreeMap) messageContent.get("bdy")).get("uid").toString();
-    }
-
-    private String getNickname(Map<String, Object> messageContent) {
-        if (getProfile(messageContent) == null) {
-            return getUid(messageContent);
-        }
-        return getProfile(messageContent).get("nickname").toString();
-    }
-
-    private String getMsg(Map<String, Object> messageContent) {
-        return ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("msg").toString();
-    }
-
-    private String getDonationType(Map<String, Object> messageContent) {
-        HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
-
-        String donationType = null;
-        if (extras.get("donationType") != null) {
-            donationType = extras.get("donationType").toString();
-        }
-
-        return donationType;
-    }
-
-    private String getCost(Map<String, Object> messageContent) {
-        return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString();
-    }
-
     private void logInfoFor(ChatCommand command) {
         log.debug("{} : {}", command.name(), command.getValue());
     }
 
     private void sendCommandMessage(WebSocketSession session, HashMap userInfo, String commandInputMessage) {
-        if (isSpecialUser(userInfo)) {
+        if (authorizationManager.isSpecialUser(userInfo)) {
             return;
         }
         List<CommandMessageEntity> commandList = messageRepository.findAll();
 
         final AtomicReference<HashMap<String, Object>> messageSendOptions = initializeMessageSendOptions(); // Final
 
-        if (hasCommandPermission(userInfo)) {
+        if (authorizationManager.hasCommandPermission(userInfo)) {
             String[] commandArguments = commandInputMessage.split(" ");
             String commandType = commandArguments[0];
 
@@ -444,12 +390,6 @@ public class ChatMain {
         return upTimeMessage.toString();
     }
 
-    private void appendTimeUnit(StringBuilder sb, long timeUnit, String unitName) {
-        if (timeUnit > 0) {
-            sb.append(timeUnit).append(unitName);
-        }
-    }
-
     private String getCommandMessage(String command, List<CommandMessageEntity> commandList) {
         return commandList.stream()
                 .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
@@ -464,14 +404,6 @@ public class ChatMain {
                 .findFirst()
                 .map(CommandMessageEntity::isNickNameUse)
                 .orElse(false);
-    }
-
-    private boolean isSpecialUser(HashMap userInfo) {
-        return userInfo.get(NICKNAME).toString().equals(botName);
-    }
-
-    private boolean hasCommandPermission(HashMap userInfo) {
-        return userInfo.get(USER_ROLE_CODE).toString().equals("streamer") || userInfo.get(NICKNAME).toString().equals("칠색딱따구리");
     }
 
     private AtomicReference<HashMap<String, Object>> initializeMessageSendOptions() {
