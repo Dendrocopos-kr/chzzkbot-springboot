@@ -36,6 +36,4 @@ public class MessageService {
                 .build();
         normalMessageRepository.save(normalMessage);
     }
-
-    // include methods here to build NormalMessageEntity and DonationMessageEntity
 }
