@@ -37,13 +37,23 @@ public class EntityUtils {
         String donationType = null;
         if (extras.get("donationType") != null) {
             donationType = extras.get("donationType").toString();
+        } else if (extras.get("month") != null) {
+            donationType = "subscribe";
         }
 
         return donationType;
     }
 
     public static String getCost(Map<String, Object> messageContent) {
-        return (gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class)).get("payAmount").toString();
+        HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
+
+        String cost = null;
+        if (extras.get("payAmount") != null) {
+            cost = extras.get("payAmount").toString();
+        } else if (extras.get("tierName") != null) {
+            cost = extras.get("tierName").toString();
+        }
+        return cost;
     }
 
 }
