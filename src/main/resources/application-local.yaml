@@ -42,6 +42,7 @@ logging:
   level:
     org.springframework.messaging: debug
     org.springframework.web.socket: debug
+    org.hibernate: error
     liquibase: debug
 chzzk:
   bot:
