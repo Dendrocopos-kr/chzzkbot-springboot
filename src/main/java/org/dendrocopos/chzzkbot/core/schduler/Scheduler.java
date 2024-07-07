@@ -18,13 +18,17 @@ public class Scheduler {
 
     @Scheduled(cron = "0 * * * * *") // 1분마다
     //@Scheduled(cron = "*/5 * * * * *") //5초마다
-    public void checkLive() {
-        log.debug("Checking live scheduler");
+    public void checkConnection() {
+        log.debug("Checking connection on minute basis");
         if (isChatOpen()) {
             checkAndOpenWebSocket();
-        } else {
-            checkAndCloseWebSocket();
         }
+    }
+
+    @Scheduled(cron = "0 */10 * * * *") // 10분마다 실행되는 스케줄러
+    public void disconnect() {
+        log.debug("Disconnecting on 10 minute basis");
+        checkAndCloseWebSocket();
     }
 
     private void checkAndOpenWebSocket() {
