@@ -28,7 +28,9 @@ public class Scheduler {
     @Scheduled(cron = "0 */10 * * * *") // 10분마다 실행되는 스케줄러
     public void disconnect() {
         log.debug("Disconnecting on 10 minute basis");
-        checkAndCloseWebSocket();
+        if (!isChatOpen()) {
+            checkAndCloseWebSocket();
+        }
     }
 
     private void checkAndOpenWebSocket() {
