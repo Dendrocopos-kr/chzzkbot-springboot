@@ -41,9 +41,10 @@ security:
 logging:
   level:
     org.springframework.messaging: debug
-    org.springframework.web.socket: debug
-    org.hibernate: error
-    liquibase: debug
+    org.springframework.web.socket: info
+    org.hibernate: info
+    liquibase: info
+    root: info
 chzzk:
   bot:
     name: "뮤쪽이"

@@ -43,6 +43,7 @@ public class ChatMain {
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
     private final MessageService messageService;
+
     @Getter
     public LinkedTreeMap channelInfoDetail;
     @Value("${chzzk.bot.closingMessage}")

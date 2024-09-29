@@ -1,10 +1,15 @@
 services:
   postgres:
-    image: 'postgres'
+    image: 'postgres:latest'
     environment:
       - 'POSTGRES_DB=guribot'
       - 'POSTGRES_PASSWORD=guribot'
       - 'POSTGRES_USER=guribot'
     ports:
       - '5432:5432'
-    restart: always
+    networks:
+      - docker-bridge-network
+    #restart: always
+networks:
+  docker-bridge-network:
+    driver: bridge
