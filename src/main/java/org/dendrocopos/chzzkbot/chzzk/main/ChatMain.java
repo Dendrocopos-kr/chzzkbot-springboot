@@ -346,9 +346,9 @@ public class ChatMain {
 
     private void processCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         switch (commandInputMessage) {
-            case COMMAND:
+            /*case COMMAND:
                 executeCommands(commandList, session, messageSendOptionsReference);
-                break;
+                break;*/
             case UPTIME:
                 executeUptime(session, messageSendOptionsReference);
                 break;
@@ -359,14 +359,14 @@ public class ChatMain {
         }
     }
 
-    private void executeCommands(List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
+    /*private void executeCommands(List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         List<String> filteredCommands = commandList.stream()
                 .map(CommandMessageEntity::getCmdStr)
                 .filter(s -> !s.equals(COMMAND))
                 .filter(s -> s.charAt(0) == '!')
                 .toList();
         sendMessageToUser(session, filteredCommands.isEmpty() ? "No commands are available." : String.join(", ", filteredCommands), messageSendOptionsReference);
-    }
+    }*/
 
     private void executeUptime(WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         String upTimeMessage = "";

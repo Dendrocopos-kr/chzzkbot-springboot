@@ -11,7 +11,7 @@ public class Constants {
     public static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
     public static final String SUCCESS_CODE = "200.0";
     public static final String COMMAND_ENTITY_TRUE = "true";
-    public static final String COMMAND = "!명령어";
+    //public static final String COMMAND = "!명령어";
     public static final String UPTIME = "!업타임";
     public static final String SVCID_KEY = "svcid";
     public static final String CMD_KEY = "cmd";

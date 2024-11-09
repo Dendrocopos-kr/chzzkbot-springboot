@@ -1,3 +1,5 @@
+
+
 spring:
   application:
     name: chzzkbot
@@ -36,7 +38,7 @@ spring:
 server:
   port: 8180
 security:
-  allowed-uris: /,/test
+  allowed-uris: /,/test,/css/**,/js/**
   authenticated-uris: /admin,/command
 logging:
   level:
