@@ -42,3 +42,32 @@ tr:hover {
     margin: 0 auto;
     max-width: 90%;
 }
+
+.login-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.btn {
+    padding: 10px 15px;
+    background-color: var(--main-color);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    width: 100%;
+}

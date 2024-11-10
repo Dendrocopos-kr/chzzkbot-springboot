@@ -407,6 +407,10 @@ public class ChatMain {
                 .orElse(false);
     }
 
+    /**
+     * 초기 메세지 전송 옵션
+     * @return
+     */
     private AtomicReference<HashMap<String, Object>> initializeMessageSendOptions() {
         HashMap<String, Object> messageSendOptions = new HashMap<>();
         messageSendOptions.put("ver", "2");

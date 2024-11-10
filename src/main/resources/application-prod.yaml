@@ -36,8 +36,8 @@ spring:
 server:
   port: 8180
 security:
-  allowed-uris: /,/test
-  authenticated-uris: /admin,/command
+  allowed-uris: /,/css/**,/js/**,/register
+  authenticated-uris: /commandList
 logging:
   level:
     org.springframework.messaging: error

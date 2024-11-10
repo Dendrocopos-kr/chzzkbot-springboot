@@ -39,8 +39,7 @@ public class WebSecurityConfig {
                                 .requestMatchers(getAllowedUris).authenticated()
                                 .anyRequest().denyAll()
                 )
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll
-                )
+                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .logout(LogoutConfigurer::permitAll)
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

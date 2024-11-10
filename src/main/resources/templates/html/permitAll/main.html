@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="kr">
+<head>
+    <title>뮤쪽이 명령어 모음</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+<main>
+    <h1 class="main-title">뮤쪽이 명령어 모음</h1>
+    <table class="main-table">
+        <thead>
+        <tr>
+            <th>명령어</th>
+            <th>응답내용</th>
+            <!-- 추가적인 컬럼을 여기에 추가하세요 -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${data}">
+            <td th:text="${item.cmdStr}"></td>
+            <td th:text="${item.cmdMsg}"></td>
+            <!-- 추가적인 컬럼 값을 여기에 추가하세요 -->
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

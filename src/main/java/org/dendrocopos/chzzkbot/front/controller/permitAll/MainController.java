@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.home.controller;
+package org.dendrocopos.chzzkbot.front.controller.permitAll;
 
 
 import lombok.AllArgsConstructor;
@@ -16,11 +16,11 @@ import java.util.List;
 public class MainController {
   private final CommandMessageRepository commandMessageRepository;
 
-  @RequestMapping("/")
+  @RequestMapping(value = "/")
   public String showMainPage(Model model) {
     List<CommandMessageEntity> data = commandMessageRepository.findAll();
     model.addAttribute("data", data);
     
-    return "main"; // 이 부분은 thymeleaf 템플릿 파일 이름과 동일해야 합니다. 
+    return "/html/permitAll/main"; // 이 부분은 thymeleaf 템플릿 파일 이름과 동일해야 합니다.
   }
 }
