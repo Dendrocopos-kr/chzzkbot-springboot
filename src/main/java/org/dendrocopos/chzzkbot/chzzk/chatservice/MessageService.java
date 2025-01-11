@@ -24,6 +24,8 @@ public class MessageService {
                 .msg(getMsg(messageContent))
                 .donationType(getDonationType(messageContent))
                 .cost(getCost(messageContent))
+                .giftCount(getGiftCount(messageContent))
+                .selectionType(getSelectType(messageContent))
                 .build();
         donationMessageRepository.save(donationMessage);
     }

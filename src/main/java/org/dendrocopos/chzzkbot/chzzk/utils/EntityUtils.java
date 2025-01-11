@@ -6,6 +6,7 @@ import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class EntityUtils {
@@ -21,10 +22,10 @@ public class EntityUtils {
     }
 
     public static String getNickname(Map<String, Object> messageContent) {
-        if (getProfile(messageContent) == null) {
-            return getUid(messageContent);
-        }
-        return getProfile(messageContent).get("nickname").toString();
+        return Optional.ofNullable(getProfile(messageContent))
+                .flatMap(profile -> Optional.ofNullable(profile.get("nickname"))
+                        .map(Object::toString))
+                .orElseGet(() -> getUid(messageContent));
     }
 
     public static String getMsg(Map<String, Object> messageContent) {
@@ -39,6 +40,8 @@ public class EntityUtils {
             donationType = extras.get("donationType").toString();
         } else if (extras.get("month") != null) {
             donationType = "subscribe";
+        } else if (extras.get("month") != null) {
+            donationType = "gift";
         }
 
         return donationType;
@@ -52,8 +55,30 @@ public class EntityUtils {
             cost = extras.get("payAmount").toString();
         } else if (extras.get("tierName") != null) {
             cost = extras.get("tierName").toString();
+        } else if (extras.get("giftTierName") != null) {
+            cost = extras.get("giftTierName").toString();
         }
         return cost;
+    }
+
+    public static String getGiftCount(Map<String, Object> messageContent) {
+        HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
+        String giftCount = null;
+        if (extras.get("quantity") != null) {
+            giftCount = extras.get("quantity").toString();
+        }
+        return giftCount;
+    }
+
+    public static String getSelectType(Map<String, Object> messageContent) {
+        HashMap<String, Object> extras = (HashMap<String, Object>) gson.fromJson((String) ((LinkedTreeMap) ((ArrayList) messageContent.get("bdy")).get(0)).get("extras"), HashMap.class);
+        String getSelectType = null;
+        if (extras.get("getSelectType") != null) {
+            getSelectType = extras.get("getSelectType").toString();
+        }
+
+
+        return getSelectType;
     }
 
 }

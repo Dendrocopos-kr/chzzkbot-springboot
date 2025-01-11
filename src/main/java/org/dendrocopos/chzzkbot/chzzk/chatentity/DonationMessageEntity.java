@@ -31,6 +31,10 @@ public class DonationMessageEntity {
 
     private String donationType;
 
+    private String selectionType;
+
+    private String giftCount;
+
     private String cost;
 
     private LocalDateTime inputTime;

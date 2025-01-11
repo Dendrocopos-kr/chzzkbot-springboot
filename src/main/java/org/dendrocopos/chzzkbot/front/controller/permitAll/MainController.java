@@ -21,7 +21,7 @@ public class MainController {
   public String showMainPage(Model model) {
     List<CommandMessageEntity> data = commandMessageRepository.findAll();
     model.addAttribute("data", data);
-    
+
     return "/html/permitAll/main"; // 이 부분은 thymeleaf 템플릿 파일 이름과 동일해야 합니다.
   }
 }
