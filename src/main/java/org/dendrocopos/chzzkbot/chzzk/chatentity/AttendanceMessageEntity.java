@@ -13,7 +13,7 @@ import org.hibernate.envers.Audited;
 @Builder
 @Entity
 @Audited
-@Table(name = "attendanceMessage")
+@Table(name = "attendance_message")
 public class AttendanceMessageEntity {
 
     @Id

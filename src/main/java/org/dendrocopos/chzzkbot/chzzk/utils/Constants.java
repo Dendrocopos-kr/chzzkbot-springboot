@@ -7,8 +7,8 @@ public class Constants {
     public static final String USER_ROLE_CODE = "userRoleCode";
     public static final String COMMAND_ADD = "!추가";
     public static final String COMMAND_MODIFY = "!수정";
+    public static final String COMMAND_COOLDOWN = "!쿨타임";
     public static final String COMMAND_DELETE = "!삭제";
-    public static final int CONSTANT_OF_LENGTH_FOR_DELETE = 2;
     public static final String SUCCESS_CODE = "200.0";
     public static final String COMMAND_ENTITY_TRUE = "true";
     //public static final String COMMAND = "!명령어";

@@ -13,6 +13,8 @@
         <tr>
             <th>명령어</th>
             <th>응답내용</th>
+            <th>쿨타임(ms)</th>
+            <th>마지막 호출시간</th>
             <!-- 추가적인 컬럼을 여기에 추가하세요 -->
         </tr>
         </thead>
@@ -20,6 +22,8 @@
         <tr th:each="item : ${data}">
             <td th:text="${item.cmdStr}"></td>
             <td th:text="${item.cmdMsg}"></td>
+            <td th:text="${item.cooldown}"></td>
+            <td th:text="${item.lastCommandTime}"></td>
             <!-- 추가적인 컬럼 값을 여기에 추가하세요 -->
         </tr>
         </tbody>

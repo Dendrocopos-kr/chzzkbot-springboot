@@ -22,11 +22,15 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
@@ -43,6 +47,7 @@ public class ChatMain {
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
     private final MessageService messageService;
+    private final CommandMessageRepository commandMessageRepository;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
@@ -66,6 +71,7 @@ public class ChatMain {
     private String announcementMessage;
     private boolean isWebSocketOpen = false;
     private int serverId;
+    private AtomicLong lastCmdTime = new AtomicLong(0);
 
     public boolean isWebSocketOpen() {
         return isWebSocketOpen;
@@ -328,6 +334,9 @@ public class ChatMain {
                 case COMMAND_DELETE:
                     handleDeleteCommand(session, commandArguments, messageSendOptions);
                     break;
+                case COMMAND_COOLDOWN:
+                    handleUpdateCooldown(session, commandArguments, messageSendOptions);
+                    break;
             }
         }
         checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
@@ -335,11 +344,13 @@ public class ChatMain {
 
     private void checkForCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference, HashMap userInfo) {
         if (commandList.stream().anyMatch(commandMessageEntity -> commandInputMessage.equals(commandMessageEntity.getCmdStr()))) {
-            if (isCommandUsesNickname(commandInputMessage, commandList)) {
-                String responseMessage = userInfo.get(NICKNAME) + "님 " + getCommandMessage(commandInputMessage, commandList);
-                sendMessageToUser(session, responseMessage, messageSendOptionsReference);
-            } else {
-                processCommand(commandInputMessage, commandList, session, messageSendOptionsReference);
+            if(isCooldownElapsed(commandInputMessage,commandList)){
+                if (isCommandUsesNickname(commandInputMessage, commandList)) {
+                    String responseMessage = userInfo.get(NICKNAME) + "님 " + getCommandMessage(commandInputMessage, commandList);
+                    sendMessageToUser(session, responseMessage, messageSendOptionsReference);
+                } else {
+                    processCommand(commandInputMessage, commandList, session, messageSendOptionsReference);
+                }
             }
         }
     }
@@ -407,6 +418,31 @@ public class ChatMain {
                 .orElse(false);
     }
 
+    private boolean isCooldownElapsed(String command, List<CommandMessageEntity> commandList) {
+        Boolean commandOptional = commandList.stream()
+                .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
+                .findFirst()
+                .map(commandMessageEntity -> {
+                    LocalDateTime lastCommandTime = commandMessageEntity.getLastCommandTime();
+                    if (lastCommandTime == null) {
+                        return true;
+                    }
+                    Duration durationSinceLastCommand = Duration.between(lastCommandTime, LocalDateTime.now());
+                    long millisSinceLastCommand = durationSinceLastCommand.toMillis();
+                    return millisSinceLastCommand > commandMessageEntity.getCooldown();
+                })
+                .orElse(false);
+        if (commandOptional) {
+            commandMessageRepository.save(
+                    CommandMessageEntity.builder()
+                            .cmdStr(command)
+                            .lastCommandTime(LocalDateTime.now())
+                            .build()
+            );
+        }
+        return commandOptional;
+    }
+
     /**
      * 초기 메세지 전송 옵션
      * @return
@@ -424,31 +460,47 @@ public class ChatMain {
     }
 
     private void handleDeleteCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
-        if (commandArguments.length == CONSTANT_OF_LENGTH_FOR_DELETE) {
+        if (commandArguments.length == 2) {
             String command = commandArguments[1];
             messageRepository.deleteById(command);
 
             String feedbackMessage = command + " 명령어가 삭제 되었습니다.";
             sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
         } else {
-            String feedbackMessage = "!삭제 [커맨드] 형식으로 입력해주세요.";
+            String feedbackMessage = "!삭제 [명령어] 형식으로 입력해주세요.";
+            sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+        }
+    }
+
+    private void handleUpdateCooldown(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String,Object>> messageSendOptionsReference){
+        if(commandArguments.length == 3){
+            String command = commandArguments[1];
+            long cooldown = Long.parseLong(commandArguments[2]);
+            if( cooldown < 0 ){
+                String feedbackMessage = "쿨타임은 [0]ms 이상으로 입력해주세요";
+                sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
+                return;
+            }
+            messageRepository.save(
+                    CommandMessageEntity.builder()
+                            .cmdStr(command)
+                            .cooldown(cooldown)
+                            .build()
+            );
+        }else{
+            String feedbackMessage = "!쿨타임 [명령어] [5000] 형식으로 입력해주세요";
             sendMessageToUser(session, feedbackMessage, messageSendOptionsReference);
         }
     }
 
     private void handleAddOrModifyCommand(WebSocketSession session, String[] commandArguments, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
-        if (commandArguments.length == 3 || commandArguments.length == 4) {
-            String command = commandArguments[1].replaceAll("_", " ");
+        if (commandArguments.length == 3) {
+            String command = commandArguments[1];
             String response = commandArguments[2].replaceAll("_", " ");
-            boolean nicknameUse = false;
-            if (commandArguments.length == 4) {
-                nicknameUse = commandArguments[3].equalsIgnoreCase(COMMAND_ENTITY_TRUE);
-            }
 
             messageRepository.save(CommandMessageEntity.builder()
                     .cmdStr(command)
                     .cmdMsg(response)
-                    .nickNameUse(nicknameUse)
                     .build());
 
             String feedbackMessage = command + " 명령어가 수정되었습니다.";
@@ -460,9 +512,8 @@ public class ChatMain {
     }
 
     private String getUsageMessageForModifyOrAddCommand() {
-        return "!추가 [커맨드] [응답] [대상여부] 형식으로 입력해주세요." +
-                "[띄어쓰기는 _ 로 바꿔주세요]." +
-                "[대상여부는 빈 값일 경우 true, false 로 입력해주세요].";
+        return "!추가 [명령어] [응답] 형식으로 입력해주세요." +
+                "[띄어쓰기는 _ 로 바꿔주세요].";
     }
 
     private void sendMessageToUser(WebSocketSession session, String msg, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {

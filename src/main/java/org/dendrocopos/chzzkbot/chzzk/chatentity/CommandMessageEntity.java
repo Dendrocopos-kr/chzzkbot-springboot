@@ -1,10 +1,11 @@
 package org.dendrocopos.chzzkbot.chzzk.chatentity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import org.hibernate.envers.Audited;
 @Builder
 @Entity
 @Audited
-@Table(name = "commandMessage")
+@Table(name = "command_message")
 public class CommandMessageEntity {
 
     @Id
@@ -22,4 +23,15 @@ public class CommandMessageEntity {
     private String cmdMsg;
 
     private boolean nickNameUse;
+
+    private Long cooldown = 5000L;
+
+    private LocalDateTime lastCommandTime = LocalDateTime.now();
+
+    @PrePersist
+    public void onPrePersist() {
+        this.lastCommandTime = LocalDateTime.now();
+        this.nickNameUse = false;
+    }
+
 }

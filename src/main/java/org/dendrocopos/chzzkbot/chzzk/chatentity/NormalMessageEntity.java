@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Audited
-@Table(name = "normalMessage", indexes = {@Index(name = "index_normalMessage", columnList = "nickName")})
+@Table(name = "normal_message", indexes = {@Index(name = "index_normalMessage", columnList = "nickName")})
 public class NormalMessageEntity {
 
     @Id

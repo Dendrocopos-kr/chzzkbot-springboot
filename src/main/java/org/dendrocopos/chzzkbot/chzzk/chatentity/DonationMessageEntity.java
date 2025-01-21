@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Audited
-@Table(name = "donationMessage")
+@Table(name = "donation_message")
 public class DonationMessageEntity {
 
     @Id

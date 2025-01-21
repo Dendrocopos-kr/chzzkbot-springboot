@@ -20,13 +20,17 @@ table {
 
 th {
     background-color: var(--main-color);
+    text-align: center;
     color: #fff;
 }
 
 th, td {
     border: 1px solid var(--secondary-color);
     padding: 15px;
-    text-align: left;
+}
+
+td:nth-child(3) {
+    text-align: right;
 }
 
 tr:hover {
