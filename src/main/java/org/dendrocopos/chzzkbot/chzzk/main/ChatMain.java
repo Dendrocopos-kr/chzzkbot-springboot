@@ -22,15 +22,12 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
@@ -71,7 +68,6 @@ public class ChatMain {
     private String announcementMessage;
     private boolean isWebSocketOpen = false;
     private int serverId;
-    private AtomicLong lastCmdTime = new AtomicLong(0);
 
     public boolean isWebSocketOpen() {
         return isWebSocketOpen;
@@ -106,11 +102,11 @@ public class ChatMain {
     }
 
     public void fetchChannelDetail() {
-        String searchChannelDteail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
-        HashMap channelDteail = gson.fromJson(searchChannelDteail, HashMap.class);
-        if (channelDteail.get("code").toString().equals(SUCCESS_CODE)) {
-            //log.debug("searchChannelInfoDetail : {}", channelDteail.get("content"));
-            channelInfoDetail = ((LinkedTreeMap) channelDteail.get("content"));
+        String searchChannelDetail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
+        HashMap channelDetail = gson.fromJson(searchChannelDetail, HashMap.class);
+        if (channelDetail.get("code").toString().equals(SUCCESS_CODE)) {
+            //log.debug("searchChannelInfoDetail : {}", channelDetail.get("content"));
+            channelInfoDetail = ((LinkedTreeMap) channelDetail.get("content"));
         }
     }
 
@@ -356,28 +352,30 @@ public class ChatMain {
     }
 
     private void processCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
-        switch (commandInputMessage) {
-            /*case COMMAND:
-                executeCommands(commandList, session, messageSendOptionsReference);
-                break;*/
-            case UPTIME:
+        String responseMessage = "";
+                switch (commandInputMessage) {
+            case "!업타임":
                 executeUptime(session, messageSendOptionsReference);
                 break;
+            case "?":
+                responseMessage = getCommandMessage(commandInputMessage, commandList);
+                Long counting = getCommandCounting(commandInputMessage, commandList);
+                countCommand(session,responseMessage,counting,messageSendOptionsReference);
+                CommandMessageEntity commandMessage = getCommandMessageEntity(commandInputMessage, commandList);
+                commandMessage.setCounting(Optional.ofNullable(commandMessage.getCounting()).orElse(0L)+1);
+                commandMessageRepository.save(commandMessage);
+                break;
+            case "!팔로우":
             default:
-                String responseMessage = getCommandMessage(commandInputMessage, commandList);
+                responseMessage = getCommandMessage(commandInputMessage, commandList);
                 sendMessageToUser(session, responseMessage, messageSendOptionsReference);
                 break;
         }
     }
 
-    /*private void executeCommands(List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
-        List<String> filteredCommands = commandList.stream()
-                .map(CommandMessageEntity::getCmdStr)
-                .filter(s -> !s.equals(COMMAND))
-                .filter(s -> s.charAt(0) == '!')
-                .toList();
-        sendMessageToUser(session, filteredCommands.isEmpty() ? "No commands are available." : String.join(", ", filteredCommands), messageSendOptionsReference);
-    }*/
+    private void countCommand(WebSocketSession session, String responseMessage, Long counting, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
+        sendMessageToUser(session, String.format("%s %d개 수집중",responseMessage,counting), messageSendOptionsReference);
+    }
 
     private void executeUptime(WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         String upTimeMessage = "";
@@ -402,6 +400,17 @@ public class ChatMain {
         return upTimeMessage.toString();
     }
 
+    private CommandMessageEntity getCommandMessageEntity(String command, List<CommandMessageEntity> commandList){
+        return commandList.stream().filter(commandMessageEntity -> commandMessageEntity.getCmdStr().equals(command)).findFirst().orElse(null);
+    }
+
+    private Long getCommandCounting(String command, List<CommandMessageEntity> commandList){
+        return commandList.stream().filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
+                .findFirst()
+                .map(CommandMessageEntity::getCounting)
+                .orElse(0L);
+    }
+
     private String getCommandMessage(String command, List<CommandMessageEntity> commandList) {
         return commandList.stream()
                 .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
@@ -419,33 +428,30 @@ public class ChatMain {
     }
 
     private boolean isCooldownElapsed(String command, List<CommandMessageEntity> commandList) {
-        Boolean commandOptional = commandList.stream()
+        return commandList.stream()
                 .filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
                 .findFirst()
-                .map(commandMessageEntity -> {
-                    LocalDateTime lastCommandTime = commandMessageEntity.getLastCommandTime();
-                    if (lastCommandTime == null) {
-                        return true;
-                    }
-                    Duration durationSinceLastCommand = Duration.between(lastCommandTime, LocalDateTime.now());
-                    long millisSinceLastCommand = durationSinceLastCommand.toMillis();
-                    return millisSinceLastCommand > commandMessageEntity.getCooldown();
-                })
+                .map(this::updateCommandTimeIfNecessary)
                 .orElse(false);
-        if (commandOptional) {
-            commandMessageRepository.save(
-                    CommandMessageEntity.builder()
-                            .cmdStr(command)
-                            .lastCommandTime(LocalDateTime.now())
-                            .build()
-            );
+    }
+
+    private boolean updateCommandTimeIfNecessary(CommandMessageEntity cmd) {
+        LocalDateTime lastCommandTime = cmd.getLastCommandTime();
+        if (lastCommandTime == null || isCooldownElapsed(lastCommandTime, cmd.getCooldown())) {
+            cmd.setLastCommandTime(LocalDateTime.now());
+            commandMessageRepository.save(cmd);
+            return true;
         }
-        return commandOptional;
+        return false;
+    }
+
+    private boolean isCooldownElapsed(LocalDateTime lastCommandTime, long cooldown) {
+        Duration durationSinceLastCommand = Duration.between(lastCommandTime, LocalDateTime.now());
+        return durationSinceLastCommand.toMillis() > cooldown;
     }
 
     /**
      * 초기 메세지 전송 옵션
-     * @return
      */
     private AtomicReference<HashMap<String, Object>> initializeMessageSendOptions() {
         HashMap<String, Object> messageSendOptions = new HashMap<>();
@@ -550,7 +556,7 @@ public class ChatMain {
                 for (String contentKey : content.keySet()) {
                     if (DATA.equals(contentKey)) {
                         List<LinkedTreeMap<String, Object>> dataList = content.get(DATA);
-                        LinkedTreeMap<String, Object> channelInfo = dataList.get(0);
+                        LinkedTreeMap<String, Object> channelInfo = dataList.getFirst();
                         log.debug("search channelInfo : {}", channelInfo);
                         return (LinkedTreeMap<String, Object>) channelInfo.get("channel");
                     }

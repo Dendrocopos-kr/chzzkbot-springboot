@@ -28,10 +28,13 @@ public class CommandMessageEntity {
 
     private LocalDateTime lastCommandTime = LocalDateTime.now();
 
+    private Long counting = 0L;
+
     @PrePersist
     public void onPrePersist() {
         this.lastCommandTime = LocalDateTime.now();
         this.nickNameUse = false;
+        this.counting = 0L;
     }
 
 }

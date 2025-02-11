@@ -12,7 +12,6 @@ public class Constants {
     public static final String SUCCESS_CODE = "200.0";
     public static final String COMMAND_ENTITY_TRUE = "true";
     //public static final String COMMAND = "!명령어";
-    public static final String UPTIME = "!업타임";
     public static final String SVCID_KEY = "svcid";
     public static final String CMD_KEY = "cmd";
     public static final String CID_KEY = "cid";

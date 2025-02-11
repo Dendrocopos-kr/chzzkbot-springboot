@@ -3,9 +3,9 @@ package org.dendrocopos.chzzkbot.core.api;
 import org.dendrocopos.chzzkbot.core.utils.ErrorCode;
 
 public class ApiResponse<T> {
-    private ApiHeader header;
+    private final ApiHeader header;
     private ApiBody body;
-    private static int SUCCESS = 200;
+    private static final int SUCCESS = 200;
 
     public ApiResponse(ApiHeader header) {
         this.header = header;

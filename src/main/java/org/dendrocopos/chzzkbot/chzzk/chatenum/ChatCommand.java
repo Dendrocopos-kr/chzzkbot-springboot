@@ -1,7 +1,10 @@
 package org.dendrocopos.chzzkbot.chzzk.chatenum;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
+@Getter
 public enum ChatCommand {
     PING(0),
     PONG(10000),
@@ -32,10 +35,6 @@ public enum ChatCommand {
                 return cmd;
             }
         }
-        return value;
-    }
-
-    public int getValue() {
         return value;
     }
 
