@@ -66,4 +66,5 @@ eureka:
     hostname: localhost
 ollama:
   callCommand: 뮤쪽아!
+  model: "myuzzoki:latest"
   baseURL: http://127.0.0.1:11434
