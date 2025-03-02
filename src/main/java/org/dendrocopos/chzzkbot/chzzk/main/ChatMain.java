@@ -43,7 +43,7 @@ public class ChatMain {
     private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
     private final OllamaServices ollamaServices;
-    private Gson gson;
+    private final Gson gson;
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
     private final MessageService messageService;
