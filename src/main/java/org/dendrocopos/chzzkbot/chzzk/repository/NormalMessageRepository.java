@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NormalMessageRepository extends JpaRepository<NormalMessageEntity, String> {
 
+    Long countByMsg(String msg);
 }

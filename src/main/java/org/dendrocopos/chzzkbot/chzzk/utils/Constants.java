@@ -1,5 +1,8 @@
 package org.dendrocopos.chzzkbot.chzzk.utils;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+
 public class Constants {
     public static final String CONTENT = "content";
     public static final String DATA = "data";
@@ -22,4 +25,13 @@ public class Constants {
     public static final String OPEN_DATE = "openDate";
     public static final String CLOSE_DATE = "closeDate";
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    @Value("${chzzk.ChannelName}")
+    public static String channelName;
+    @Value("${chzzk.bot.name}")
+    public static String botName;
+    @Value("${chzzk.bot.openingMessage}")
+    public static String announcementMessage;
+    @Value("${chzzk.bot.closingMessage}")
+    public static String closingMessage;
 }

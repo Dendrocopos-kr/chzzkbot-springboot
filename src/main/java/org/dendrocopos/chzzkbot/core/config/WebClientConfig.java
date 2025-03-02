@@ -22,7 +22,7 @@ public class WebClientConfig {
     private ExchangeFilterFunction logRequest() {
         return (request, next) -> {
             log.debug("Request: {} {}", request.method(), request.url());
-            request.headers().forEach((name, values) -> values.forEach(value -> log.info(name, value)));
+            request.headers().forEach((name, values) -> values.forEach(value -> log.debug(name, value)));
             return next.exchange(request);
         };
     }

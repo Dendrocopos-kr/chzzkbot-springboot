@@ -1,7 +1,7 @@
 package org.dendrocopos.chzzkbot.chzzk.main;
 
-import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +9,12 @@ import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
 import org.dendrocopos.chzzkbot.chzzk.chatenum.ChatCommand;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
+import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
+import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
+import org.dendrocopos.chzzkbot.ollama.service.OllamaServices;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -24,15 +28,13 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
 import static org.dendrocopos.chzzkbot.chzzk.utils.EntityUtils.*;
 import static org.dendrocopos.chzzkbot.core.utils.StringUtils.appendTimeUnit;
+import static org.dendrocopos.chzzkbot.ollama.utils.Constants.*;
 
 @Slf4j
 @Component
@@ -40,16 +42,16 @@ import static org.dendrocopos.chzzkbot.core.utils.StringUtils.appendTimeUnit;
 public class ChatMain {
     private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
-    private final Gson gson = new Gson();
+    private final OllamaServices ollamaServices;
+    private Gson gson;
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
     private final MessageService messageService;
-    private final CommandMessageRepository commandMessageRepository;
+    private final NormalMessageRepository normalMessageRepository;
+    private final DonationMessageRepository donationMessageRepository;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
-    @Value("${chzzk.bot.closingMessage}")
-    public String closingMessage;
     HashMap<String, Object> openWebSocketJson = new HashMap<>();
     HashMap<String, Object> bdy = new HashMap<>();
     private Disposable webSocketSessionDisposable;
@@ -60,12 +62,7 @@ public class ChatMain {
     private String svcid;
     private String cid;
     private String sid;
-    @Value("${chzzk.ChannelName}")
-    private String channelName;
-    @Value("${chzzk.bot.name}")
-    private String botName;
-    @Value("${chzzk.bot.openingMessage}")
-    private String announcementMessage;
+
     private boolean isWebSocketOpen = false;
     private int serverId;
 
@@ -318,9 +315,9 @@ public class ChatMain {
 
         final AtomicReference<HashMap<String, Object>> messageSendOptions = initializeMessageSendOptions(); // Final
 
+        String[] commandArguments = commandInputMessage.split(" ");
+        String commandType = commandArguments[0];
         if (authorizationManager.hasCommandPermission(userInfo)) {
-            String[] commandArguments = commandInputMessage.split(" ");
-            String commandType = commandArguments[0];
 
             switch (commandType) {
                 case COMMAND_ADD:
@@ -335,7 +332,22 @@ public class ChatMain {
                     break;
             }
         }
-        checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
+        if( COMMAND_AI.equals(commandType) && commandArguments.length > 1){
+            /**
+             * AI 모델 응답대기
+             */
+            log.info("request : {}",commandInputMessage);
+            log.info("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
+
+            if( ollamaServices.isConnected() ){
+                Mono<String> response = ollamaServices.getOllamachatResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
+                response.subscribe(s -> sendMessageToUser(session, s, messageSendOptions));
+            }else{
+                sendMessageToUser(session, "AI 연결이 되지않았습니다.", messageSendOptions);
+            }
+        }else{
+            checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
+        }
     }
 
     private void checkForCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference, HashMap userInfo) {
@@ -353,7 +365,7 @@ public class ChatMain {
 
     private void processCommand(String commandInputMessage, List<CommandMessageEntity> commandList, WebSocketSession session, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         String responseMessage = "";
-                switch (commandInputMessage) {
+        switch (commandInputMessage) {
             case "!업타임":
                 executeUptime(session, messageSendOptionsReference);
                 break;
@@ -362,8 +374,8 @@ public class ChatMain {
                 Long counting = getCommandCounting(commandInputMessage, commandList);
                 countCommand(session,responseMessage,counting,messageSendOptionsReference);
                 CommandMessageEntity commandMessage = getCommandMessageEntity(commandInputMessage, commandList);
-                commandMessage.setCounting(Optional.ofNullable(commandMessage.getCounting()).orElse(0L)+1);
-                commandMessageRepository.save(commandMessage);
+                commandMessage.setCounting(counting+1);
+                messageRepository.save(commandMessage);
                 break;
             case "!팔로우":
             default:
@@ -372,6 +384,8 @@ public class ChatMain {
                 break;
         }
     }
+
+
 
     private void countCommand(WebSocketSession session, String responseMessage, Long counting, AtomicReference<HashMap<String, Object>> messageSendOptionsReference) {
         sendMessageToUser(session, String.format("%s %d개 수집중",responseMessage,counting), messageSendOptionsReference);
@@ -405,10 +419,11 @@ public class ChatMain {
     }
 
     private Long getCommandCounting(String command, List<CommandMessageEntity> commandList){
-        return commandList.stream().filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
+        /*return commandList.stream().filter(commandMessageEntity -> command.equals(commandMessageEntity.getCmdStr()))
                 .findFirst()
                 .map(CommandMessageEntity::getCounting)
-                .orElse(0L);
+                .orElse(0L);*/
+        return normalMessageRepository.countByMsg(command) + donationMessageRepository.countByMsg(command);
     }
 
     private String getCommandMessage(String command, List<CommandMessageEntity> commandList) {
@@ -439,7 +454,7 @@ public class ChatMain {
         LocalDateTime lastCommandTime = cmd.getLastCommandTime();
         if (lastCommandTime == null || isCooldownElapsed(lastCommandTime, cmd.getCooldown())) {
             cmd.setLastCommandTime(LocalDateTime.now());
-            commandMessageRepository.save(cmd);
+            messageRepository.save(cmd);
             return true;
         }
         return false;

@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DonationMessageRepository extends JpaRepository<DonationMessageEntity, String> {
 
+    Long countByMsg(String msg);
 }
