@@ -1,6 +1,7 @@
 package org.dendrocopos.chzzkbot.chzzk.chatservice;
 
 import lombok.RequiredArgsConstructor;
+import org.dendrocopos.chzzkbot.chzzk.chatservice.impl.IChzzkService;
 import org.dendrocopos.chzzkbot.chzzk.nid.nid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-public class ChzzkServices {
+public class ChzzkServices implements IChzzkService {
 
     private final WebClient webClient;
 

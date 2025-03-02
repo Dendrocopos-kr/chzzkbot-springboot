@@ -3,6 +3,7 @@ package org.dendrocopos.chzzkbot.chzzk.chatservice;
 import lombok.RequiredArgsConstructor;
 import org.dendrocopos.chzzkbot.chzzk.chatentity.DonationMessageEntity;
 import org.dendrocopos.chzzkbot.chzzk.chatentity.NormalMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.chatservice.impl.IMessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,11 @@ import static org.dendrocopos.chzzkbot.chzzk.utils.EntityUtils.*;
 
 @Service
 @RequiredArgsConstructor
-public class MessageService {
+public class MessageService implements IMessageService {
     private final DonationMessageRepository donationMessageRepository;
     private final NormalMessageRepository normalMessageRepository;
 
-    public void saveDonationMessage(Map<String, Object> messageContent) {
+    public DonationMessageEntity saveDonationMessage(Map<String, Object> messageContent) {
         DonationMessageEntity donationMessage = DonationMessageEntity.builder()
                 .uid(getUid(messageContent))
                 .nickName(getNickname(messageContent))
@@ -27,15 +28,15 @@ public class MessageService {
                 .giftCount(getGiftCount(messageContent))
                 .selectionType(getSelectType(messageContent))
                 .build();
-        donationMessageRepository.save(donationMessage);
+        return donationMessageRepository.save(donationMessage);
     }
 
-    public void saveNormalMessage(Map<String, Object> messageContent) {
+    public NormalMessageEntity saveNormalMessage(Map<String, Object> messageContent) {
         NormalMessageEntity normalMessage = NormalMessageEntity.builder()
                 .uid(getUid(messageContent))
                 .nickName(getNickname(messageContent))
                 .msg(getMsg(messageContent))
                 .build();
-        normalMessageRepository.save(normalMessage);
+        return normalMessageRepository.save(normalMessage);
     }
 }

@@ -11,11 +11,9 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
-import org.dendrocopos.chzzkbot.ollama.service.OllamaServices;
+import org.dendrocopos.chzzkbot.ollama.service.OllamaService;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -42,7 +40,7 @@ import static org.dendrocopos.chzzkbot.ollama.utils.Constants.*;
 public class ChatMain {
     private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
-    private final OllamaServices ollamaServices;
+    private final OllamaService ollamaService;
     private final Gson gson;
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
@@ -339,8 +337,8 @@ public class ChatMain {
             log.info("request : {}",commandInputMessage);
             log.info("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
 
-            if( ollamaServices.isConnected() ){
-                Mono<String> response = ollamaServices.getOllamachatResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
+            if( ollamaService.isConnected() ){
+                Mono<String> response = ollamaService.getOllamachatResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
                 response.subscribe(s -> sendMessageToUser(session, s, messageSendOptions));
             }else{
                 sendMessageToUser(session, "AI 연결이 되지않았습니다.", messageSendOptions);
