@@ -25,7 +25,7 @@ public class Scheduler {
         }
     }
 
-    @Scheduled(cron = "0 */10 * * * *") // 10분마다 실행되는 스케줄러
+    @Scheduled(cron = "0 0 * * * *") // 60분마다 실행되는 스케줄러
     public void disconnect() {
         log.debug("Disconnecting on 10 minute basis");
         if (!isChatOpen()) {
