@@ -67,12 +67,12 @@ public class Scheduler {
     }
 
     private void openChat() {
-        log.info("Opening chat");
+        log.debug("Opening chat");
         chatMain.startWebSocket();
     }
 
     private void closeChat() {
-        log.info("Closing chat");
+        log.debug("Closing chat");
         chatMain.stopWebSocketConnection();
     }
 }

@@ -1,7 +1,7 @@
 package org.dendrocopos.chzzkbot.chzzk.utils;
 
-import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;

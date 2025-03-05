@@ -4,5 +4,5 @@ import reactor.core.publisher.Mono;
 
 public interface IollamaService {
     Mono<String> getOllamachatResponse(String userInput);
-    boolean isConnected();
+    Mono<Boolean> isConnected();
 }

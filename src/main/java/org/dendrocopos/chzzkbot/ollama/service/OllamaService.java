@@ -16,7 +16,7 @@ public class OllamaService implements IollamaService {
         return ollamaClient.generateResponse(userInput);
     }
 
-    public boolean isConnected(){
+    public Mono<Boolean> isConnected(){
         return ollamaClient.isConnected();
     }
 }

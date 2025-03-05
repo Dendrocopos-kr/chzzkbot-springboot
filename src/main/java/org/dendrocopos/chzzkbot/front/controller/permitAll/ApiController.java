@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dendrocopos.chzzkbot.core.authentication.AuthenticationResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,12 @@ import java.util.Objects;
 @RequestMapping("/api")
 public class ApiController {
 
+    @Value("${chzzk.api.clientId}")
+    String clientId;
+    @Value("${chzzk.api.clientSecret}")
+    String clientSecret;
+
+
     @GetMapping("/path")
     public String path(@RequestParam String code, @RequestParam String state) {
         RestTemplate restTemplate = new RestTemplate();
@@ -28,8 +35,8 @@ public class ApiController {
 
         HashMap<String, Object> body = new HashMap<>();
         body.put("grantType", "authorization_code");
-        body.put("clientId", "013e9f2e-9e0b-4e0d-bdd1-b6489a0b812c");
-        body.put("clientSecret", "u8auQtY5GfwjVNeqIH6K_lr-wUBqgUki_NXa4DFetA4");
+        body.put("clientId", clientId);
+        body.put("clientSecret", clientSecret);
         body.put("code", code);
         body.put("state", state);
 

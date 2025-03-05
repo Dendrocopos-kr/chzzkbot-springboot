@@ -11,9 +11,10 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
-import org.dendrocopos.chzzkbot.ollama.service.OllamaService;
+import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -40,13 +41,13 @@ import static org.dendrocopos.chzzkbot.ollama.utils.Constants.*;
 public class ChatMain {
     private final WebSocketClient websocketclient;
     private final ChzzkServices chzzkServices;
-    private final OllamaService ollamaService;
     private final Gson gson;
     private final CommandMessageRepository messageRepository;
     private final AuthorizationManager authorizationManager;
     private final MessageService messageService;
     private final NormalMessageRepository normalMessageRepository;
     private final DonationMessageRepository donationMessageRepository;
+    private final OllamaClient ollamaClient;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
@@ -60,6 +61,17 @@ public class ChatMain {
     private String svcid;
     private String cid;
     private String sid;
+
+    @Value("${chzzk.ChannelName}")
+    public String channelName;
+    @Value("${chzzk.bot.name}")
+    public String botName;
+    @Value("${chzzk.bot.openingMessage}")
+    public String announcementMessage;
+    @Value("${chzzk.bot.closingMessage}")
+    public String closingMessage;
+    @Value("${ollama.callCommand}")
+    public String COMMAND_AI;
 
     private boolean isWebSocketOpen = false;
     private int serverId;
@@ -181,7 +193,7 @@ public class ChatMain {
                             getReceivedMessageFlux(session)
                     ).doOnCancel(() -> {
                         // this block will be executed when the subscription is cancelled
-                        sendMessageToUser(session, "나님도 자러갈게...", initializeMessageSendOptions());
+                        sendMessageToUser(session, closingMessage, initializeMessageSendOptions());
                         isWebSocketOpen = false;
                     }).then();
                 }
@@ -205,7 +217,7 @@ public class ChatMain {
     }
 
     public void processReceivedMessage(WebSocketSession session, String receivedMessage) {
-        log.info("Received WebSocket message: {}", receivedMessage);
+        log.debug("Received WebSocket message: {}", receivedMessage);
         HashMap<String, Object> messageContent = convertMessageToMap(receivedMessage);
 
         int commandId = fetchCommandIdFrom(messageContent);
@@ -276,7 +288,7 @@ public class ChatMain {
         try {
             messageService.saveNormalMessage(messageContent);
         } catch (Exception e) {
-            log.info("error : {}", e.getMessage());
+            log.error("error : {}", e.getMessage());
         }
 
         sendCommandMessage(session, getProfile(messageContent), getMsg(messageContent));
@@ -288,12 +300,12 @@ public class ChatMain {
         try {
             messageService.saveDonationMessage(messageContent);
         } catch (Exception e) {
-            log.info("error : {}", e.getMessage());
+            log.error("error : {}", e.getMessage());
         }
     }
 
     private void logChatOrDonationInfo(ChatCommand command, Map<String, Object> messageContent) {
-        log.info("{} :{} : {} : {}",
+        log.debug("{} :{} : {} : {}",
                 command.name(),
                 command.getValue(),
                 getNickname(messageContent),
@@ -334,15 +346,19 @@ public class ChatMain {
             /**
              * AI 모델 응답대기
              */
-            log.info("request : {}",commandInputMessage);
             log.info("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
 
-            if( ollamaService.isConnected() ){
-                Mono<String> response = ollamaService.getOllamachatResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
-                response.subscribe(s -> sendMessageToUser(session, s, messageSendOptions));
-            }else{
-                sendMessageToUser(session, "AI 연결이 되지않았습니다.", messageSendOptions);
-            }
+            ollamaClient.isConnected().flatMap(connected -> {
+                if(Boolean.TRUE.equals(connected)){
+
+                    Mono<String> response = ollamaClient.generateResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
+                    return response.doOnNext(s -> sendMessageToUser(session, s, messageSendOptions));
+                }else{
+                    sendMessageToUser(session, "AI 연결이 되지않았습니다.", messageSendOptions);
+                    return Mono.empty();
+                }
+            }).subscribe();
+
         }else{
             checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
         }
