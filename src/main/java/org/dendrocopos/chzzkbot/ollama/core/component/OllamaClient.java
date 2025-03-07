@@ -28,7 +28,7 @@ public class OllamaClient {
     public OllamaClient(@Value("${ollama.baseURL}") String baseURL, WebClient.Builder webClientBuilder) {
         this.baseURL = baseURL;
         this.webClient = webClientBuilder.baseUrl(this.baseURL).build();
-        log.info("✅ OllamaClient 초기화: baseURL = {}", this.baseURL);
+        log.debug("✅ OllamaClient 초기화: baseURL = {}", this.baseURL);
     }
 
     // ✅ 세션별 대화 히스토리 저장 (LinkedList 사용 → FIFO 구조)
@@ -50,11 +50,11 @@ public class OllamaClient {
      */
     public Flux<OllamaResponse> generateResponse(HttpSession session, String userInput) {
         String sessionId = session.getId();
-        log.info("✅ 사용자 세션 ID: {}", sessionId);
+        log.debug("✅ 사용자 세션 ID: {}", sessionId);
 
         // ✅ 세션별 기존 대화 내역 불러오기 (없으면 새 LinkedList 생성)
         LinkedList<OllamaRequest.Message> history = chatHistory.computeIfAbsent(sessionId, k -> new LinkedList<>());
-        log.info("session : {}, history : {}", sessionId, history);
+        log.debug("session : {}, history : {}", sessionId, history);
 
         // ✅ 새로운 사용자 입력 추가 (최대 개수 초과 시 오래된 데이터 삭제)
         if (history.size() >= MAX_HISTORY_SIZE) {
@@ -64,7 +64,7 @@ public class OllamaClient {
 
         // ✅ Ollama 요청 객체 생성 (대화 히스토리 포함)
         OllamaRequest request = new OllamaRequest(new LinkedList<>(history));
-        log.info("request : {}", request);
+        log.debug("request : {}", request);
 
         // ✅ AI 응답을 임시 저장할 StringBuilder
         StringBuilder responseBuffer = new StringBuilder();
@@ -90,7 +90,7 @@ public class OllamaClient {
                             if (history.size() > MAX_HISTORY_SIZE) {
                                 history.pollFirst();
                             }
-                            log.info("✅ AI 응답 저장: {}", finalResponse);
+                            log.debug("✅ AI 응답 저장: {}", finalResponse);
                         }
                         responseBuffer.setLength(0); // ✅ 버퍼 초기화
                     }
@@ -104,6 +104,6 @@ public class OllamaClient {
     public void clearChatHistory(HttpSession session) {
         String sessionId = session.getId();
         chatHistory.remove(sessionId);
-        log.info("✅ 세션 '{}' 대화 히스토리 초기화됨", sessionId);
+        log.debug("✅ 세션 '{}' 대화 히스토리 초기화됨", sessionId);
     }
 }

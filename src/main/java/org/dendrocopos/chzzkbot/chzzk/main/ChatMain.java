@@ -351,7 +351,7 @@ public class ChatMain {
             /**
              * AI 모델 응답대기
              */
-            log.info("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
+            log.debug("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
 
             ollamaClient.isConnected()
                     .flatMapMany(connected -> {
