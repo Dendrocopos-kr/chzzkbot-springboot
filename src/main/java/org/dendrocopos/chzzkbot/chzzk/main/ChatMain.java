@@ -2,6 +2,7 @@ package org.dendrocopos.chzzkbot.chzzk.main;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
+import org.dendrocopos.chzzkbot.core.utils.StringUtils;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
@@ -50,6 +52,7 @@ public class ChatMain {
     private final NormalMessageRepository normalMessageRepository;
     private final DonationMessageRepository donationMessageRepository;
     private final OllamaClient ollamaClient;
+    private final HttpSession httpSession;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
@@ -353,8 +356,8 @@ public class ChatMain {
             ollamaClient.isConnected()
                     .flatMapMany(connected -> {
                         if (Boolean.TRUE.equals(connected)) {
-                            Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(
-                                    String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new))
+                            Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(httpSession,
+                                    StringUtils.getSubstringAfterFirstSpace(commandInputMessage)
                             );
 
                             return responseFlux
