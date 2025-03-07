@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -49,7 +50,7 @@ public class OllamaClient {
                 .onErrorReturn(false); // ✅ 오류 발생 시 false 반환
     }
 
-    public Mono<String> generateResponse(String userInput) {
+    public Flux<OllamaResponse> generateResponse(String userInput) {
         log.info("✅ API 요청: baseURL = {}, URI = /api/chat", this.baseURL); // ✅ API 요청 전 URL 확인
 
         return webClient.post()
@@ -63,10 +64,9 @@ public class OllamaClient {
                                     log.error("❌ API 호출 오류: HTTP {} - 응답: {}", clientResponse.statusCode(), errorBody);
                                     return Mono.error(new RuntimeException("API 오류: " + errorBody));
                                 }))
-                .bodyToFlux(OllamaResponse.class)
-                .collectList()
-                .map(responseProcessor::processOllamaResponse)
-                .doOnNext(response -> log.info("✅ 최종 응답: {}", response)); // ✅ 최종 응답 로그 추가
+                .bodyToFlux(OllamaResponse.class) // ✅ Flux<OllamaResponse>로 직접 변환
+                .doOnNext(response -> log.info("✅ 응답 수신: {}", response)); // ✅ 개별 응답 로그 추가
     }
+
 
 }

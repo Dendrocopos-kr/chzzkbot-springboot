@@ -60,6 +60,7 @@ public class Scheduler {
             closeChat();
         }
         return statusIsOpen();
+        //return true;
     }
 
     private boolean statusIsOpen() {

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뮤쪽이 AI Chat</title>
+    <link rel="stylesheet" th:href="@{/css/ollama.css}">
+</head>
+<body>
+<div class="chat-container">
+    <div id="chat-box" class="chat-box"></div>
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="메시지를 입력하세요...">
+        <button id="send-btn">전송</button>
+    </div>
+</div>
+<script th:src="@{/js/ollama.js}"></script>
+</body>
+</html>

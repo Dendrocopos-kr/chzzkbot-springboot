@@ -1,11 +1,13 @@
 package org.dendrocopos.chzzkbot.ollama.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
 
 @Data
+@Builder
 public class OllamaResponse {
     @JsonProperty("model")
     private String model;
@@ -44,6 +46,7 @@ public class OllamaResponse {
     // ...
 
     @Data
+    @Builder
     public static class Message {
 
         @JsonProperty("role")

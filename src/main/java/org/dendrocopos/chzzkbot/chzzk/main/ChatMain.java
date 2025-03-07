@@ -11,6 +11,7 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
 import static org.dendrocopos.chzzkbot.chzzk.utils.EntityUtils.*;
@@ -348,16 +350,30 @@ public class ChatMain {
              */
             log.info("request : {}",String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
 
-            ollamaClient.isConnected().flatMap(connected -> {
-                if(Boolean.TRUE.equals(connected)){
+            ollamaClient.isConnected()
+                    .flatMapMany(connected -> {
+                        if (Boolean.TRUE.equals(connected)) {
+                            Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(
+                                    String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new))
+                            );
 
-                    Mono<String> response = ollamaClient.generateResponse(String.join(" ", Arrays.stream(commandInputMessage.split(" ")).skip(1).toArray(String[]::new)));
-                    return response.doOnNext(s -> sendMessageToUser(session, s, messageSendOptions));
-                }else{
-                    sendMessageToUser(session, "AI 연결이 되지않았습니다.", messageSendOptions);
-                    return Mono.empty();
-                }
-            }).subscribe();
+                            return responseFlux
+                                    .takeUntil(OllamaResponse::isDone) // ✅ "done": true가 나오면 중단
+                                    .map(OllamaResponse::getMessage)   // ✅ Message 객체 추출
+                                    .map(OllamaResponse.Message::getContent) // ✅ content 값만 추출
+                                    .filter(content -> content != null && !content.isBlank()) // ✅ 빈 응답 제거
+                                    .collectList() // ✅ 모든 데이터를 리스트로 수집
+                                    .map(responses -> String.join("", responses)) // ✅ 모든 글자를 붙여서 연결
+                                    .flux(); // ✅ 다시 Flux로 변환
+
+
+                        } else {
+                            sendMessageToUser(session, "AI 연결이 되지 않았습니다.", messageSendOptions);
+                            return Flux.empty();
+                        }
+                    })
+                    .doOnNext(finalResponse -> sendMessageToUser(session, finalResponse, messageSendOptions)) // ✅ 최종 데이터 전송
+                    .subscribe();
 
         }else{
             checkForCommand(commandInputMessage, commandList, session, messageSendOptions, userInfo);
