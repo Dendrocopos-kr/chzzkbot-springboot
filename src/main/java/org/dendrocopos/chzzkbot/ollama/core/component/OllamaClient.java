@@ -48,8 +48,8 @@ public class OllamaClient {
     /**
      * ✅ 세션별 AI 응답 요청 (이전 대화 포함)
      */
-    public Flux<OllamaResponse> generateResponse(HttpSession session, String userInput) {
-        String sessionId = session.getId();
+    public Flux<OllamaResponse> generateResponse(String sessionId, String userInput) {
+        //String sessionId = session.getId();
         log.info("✅ 사용자 세션 ID: {}", sessionId);
 
         // ✅ 세션별 기존 대화 내역 불러오기 (없으면 새 LinkedList 생성)

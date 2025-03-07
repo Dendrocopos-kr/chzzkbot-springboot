@@ -52,7 +52,6 @@ public class ChatMain {
     private final NormalMessageRepository normalMessageRepository;
     private final DonationMessageRepository donationMessageRepository;
     private final OllamaClient ollamaClient;
-    private final HttpSession httpSession;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
@@ -356,7 +355,7 @@ public class ChatMain {
             ollamaClient.isConnected()
                     .flatMapMany(connected -> {
                         if (Boolean.TRUE.equals(connected)) {
-                            Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(httpSession,
+                            Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(session.getId(),
                                     StringUtils.getSubstringAfterFirstSpace(commandInputMessage)
                             );
 

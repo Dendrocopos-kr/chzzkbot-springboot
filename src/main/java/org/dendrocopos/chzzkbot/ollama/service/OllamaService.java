@@ -20,8 +20,8 @@ public class OllamaService implements IollamaService {
     /**
      * ✅ 세션별 AI 응답 요청 (이전 대화 내역 포함)
      */
-    public Flux<OllamaResponse> getOllamachatResponse(HttpSession session, String userInput) {
-        return ollamaClient.generateResponse(session, userInput);
+    public Flux<OllamaResponse> getOllamachatResponse(String sessionId, String userInput) {
+        return ollamaClient.generateResponse(sessionId, userInput);
     }
 
     /**

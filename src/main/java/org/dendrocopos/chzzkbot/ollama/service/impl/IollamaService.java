@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface IollamaService {
-    Flux<OllamaResponse> getOllamachatResponse(HttpSession session, String userInput);
+    Flux<OllamaResponse> getOllamachatResponse(String sessionId, String userInput);
     Mono<Boolean> isConnected();
 }
