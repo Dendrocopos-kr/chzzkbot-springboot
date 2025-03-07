@@ -21,15 +21,15 @@ public class WebClientConfig {
 
     private ExchangeFilterFunction logRequest() {
         return (request, next) -> {
-            log.debug("Request: {} {}", request.method(), request.url());
-            request.headers().forEach((name, values) -> values.forEach(value -> log.debug(name, value)));
+            log.info("Request: {} {}", request.method(), request.url());
+            request.headers().forEach((name, values) -> values.forEach(value -> log.info(name, value)));
             return next.exchange(request);
         };
     }
 
     private ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            log.debug("Response: {}", (clientResponse.statusCode()));
+            log.info("Response: {}", (clientResponse.statusCode()));
             return Mono.just(clientResponse);
         });
     }

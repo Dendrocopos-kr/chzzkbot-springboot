@@ -19,7 +19,7 @@ public class Scheduler {
     @Scheduled(cron = "0 * * * * *") // 1분마다
     //@Scheduled(cron = "*/5 * * * * *") //5초마다
     public void checkConnection() {
-        log.debug("Checking connection on minute basis");
+        log.info("Checking connection on minute basis");
         if (isChatOpen()) {
             checkAndOpenWebSocket();
         }
@@ -27,7 +27,7 @@ public class Scheduler {
 
     @Scheduled(cron = "0 0 * * * *") // 60분마다 실행되는 스케줄러
     public void disconnect() {
-        log.debug("Disconnecting on 10 minute basis");
+        log.info("Disconnecting on 10 minute basis");
         if (!isChatOpen()) {
             checkAndCloseWebSocket();
         }
@@ -50,7 +50,7 @@ public class Scheduler {
     }
 
     private boolean isChatOpen() {
-        log.debug("Checking chat open scheduler");
+        log.info("Checking chat open scheduler");
         chatMain.fetchChannelInfo();
         chatMain.fetchUserStatus();
         chatMain.fetchChatChannelInfo();
@@ -68,12 +68,12 @@ public class Scheduler {
     }
 
     private void openChat() {
-        log.debug("Opening chat");
+        log.info("Opening chat");
         chatMain.startWebSocket();
     }
 
     private void closeChat() {
-        log.debug("Closing chat");
+        log.info("Closing chat");
         chatMain.stopWebSocketConnection();
     }
 }
