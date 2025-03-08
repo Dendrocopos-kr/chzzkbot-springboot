@@ -16,7 +16,7 @@ public class OllamaResponse {
     private ZonedDateTime createdAt;
 
     @JsonProperty("message")
-    private Message message;
+    private OllamaMessage message;
 
     @JsonProperty("done_reason")
     private String doneReason;
@@ -42,20 +42,4 @@ public class OllamaResponse {
     @JsonProperty("eval_duration")
     private long evalDuration;
 
-    // getters and setters
-    // ...
-
-    @Data
-    @Builder
-    public static class Message {
-
-        @JsonProperty("role")
-        private String role;
-
-        @JsonProperty("content")
-        private String content;
-
-        // getters and setters
-        // ...
-    }
 }

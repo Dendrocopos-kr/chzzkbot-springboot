@@ -3,6 +3,7 @@ package org.dendrocopos.chzzkbot.ollama.core.component;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaMessage;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaRequest;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ public class OllamaClient {
     }
 
     // ✅ 세션별 대화 히스토리 저장 (LinkedList 사용 → FIFO 구조)
-    private final Map<String, LinkedList<OllamaRequest.Message>> chatHistory = new ConcurrentHashMap<>();
+    private final Map<String, LinkedList<OllamaMessage>> chatHistory = new ConcurrentHashMap<>();
     private static final int MAX_HISTORY_SIZE = 15; // ✅ 최대 대화 개수 제한
 
     public Mono<Boolean> isConnected() {
@@ -53,14 +54,17 @@ public class OllamaClient {
         log.info("✅ 사용자 세션 ID: {}", sessionId);
 
         // ✅ 세션별 기존 대화 내역 불러오기 (없으면 새 LinkedList 생성)
-        LinkedList<OllamaRequest.Message> history = chatHistory.computeIfAbsent(sessionId, k -> new LinkedList<>());
+        LinkedList<OllamaMessage> history = chatHistory.computeIfAbsent(sessionId, k -> new LinkedList<>());
         log.info("session : {}, history : {}", sessionId, history);
 
         // ✅ 새로운 사용자 입력 추가 (최대 개수 초과 시 오래된 데이터 삭제)
         if (history.size() >= MAX_HISTORY_SIZE) {
             history.pollFirst(); // 가장 오래된 메시지 제거
         }
-        history.add(new OllamaRequest.Message("user", userInput));
+        history.add(OllamaMessage.builder()
+                .role("user")
+                .content(userInput)
+                .build());
 
         // ✅ Ollama 요청 객체 생성 (대화 히스토리 포함)
         OllamaRequest request = new OllamaRequest(new LinkedList<>(history));
@@ -84,7 +88,10 @@ public class OllamaClient {
                     if (Boolean.TRUE.equals(response.isDone())) {
                         String finalResponse = responseBuffer.toString().trim();
                         if (!finalResponse.isEmpty()) {
-                            history.add(new OllamaRequest.Message("assistant", finalResponse));
+                            history.add(OllamaMessage.builder()
+                                    .role("assistant")
+                                    .content(finalResponse)
+                                    .build());
 
                             // ✅ 최대 개수 유지
                             if (history.size() > MAX_HISTORY_SIZE) {

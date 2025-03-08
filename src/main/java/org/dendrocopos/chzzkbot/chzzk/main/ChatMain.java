@@ -13,6 +13,7 @@ import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.dendrocopos.chzzkbot.core.utils.StringUtils;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaMessage;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
@@ -362,7 +363,7 @@ public class ChatMain {
                             return responseFlux
                                     .takeUntil(OllamaResponse::isDone) // ✅ "done": true가 나오면 중단
                                     .map(OllamaResponse::getMessage)   // ✅ Message 객체 추출
-                                    .map(OllamaResponse.Message::getContent) // ✅ content 값만 추출
+                                    .map(OllamaMessage::getContent) // ✅ content 값만 추출
                                     .filter(content -> content != null && !content.isBlank()) // ✅ 빈 응답 제거
                                     .collectList() // ✅ 모든 데이터를 리스트로 수집
                                     .map(responses -> String.join("", responses)) // ✅ 모든 글자를 붙여서 연결
