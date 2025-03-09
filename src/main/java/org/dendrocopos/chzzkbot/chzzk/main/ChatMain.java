@@ -274,6 +274,7 @@ public class ChatMain {
         try {
             if (this.serverId == 0) {
                 log.warn("⚠️ 서버 ID가 0입니다. 새로운 서버 ID를 계산합니다.");
+                this.serverId = calculateServerId();
                 return true; // ID가 설정되지 않은 경우 변경 필요
             }
 

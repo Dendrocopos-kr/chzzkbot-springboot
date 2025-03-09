@@ -10,6 +10,23 @@ services:
     networks:
       - docker-bridge-network
     #restart: always
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - docker-bridge-network
+
 networks:
   docker-bridge-network:
     driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

@@ -38,13 +38,4 @@ public class OllamaController {
         log.info("🔹 세션 ID: {}", session.getId());
         return ResponseEntity.ok(ollamaService.getOllamachatResponse(session.getId(), request ));
     }
-
-    /**
-     * ✅ 세션별 대화 기록 초기화 (필요 시 호출 가능)
-     */
-    @PostMapping(value = "/chat/clear")
-    public ResponseEntity<String> clearChatHistory(HttpSession session) {
-        ollamaService.clearChatHistory(session);
-        return ResponseEntity.ok("✅ 대화 기록이 초기화되었습니다.");
-    }
 }

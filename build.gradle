@@ -18,7 +18,7 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+    mavenCentral() // ✅ Maven 중앙 저장소 추가
 }
 
 ext {
@@ -40,28 +40,37 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // ✅ JPA & Hibernate
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // ✅ Hibernate Envers (Auditing)
+    implementation 'org.hibernate:hibernate-envers:6.5.2.Final'
+
     implementation 'org.liquibase:liquibase-core'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux:'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    implementation 'org.hibernate:hibernate-core:6.5.2.Final'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    implementation 'org.hibernate:hibernate-envers:7.0.0.Alpha3'
-    // Spring Boot WebFlux (WebClient 사용)
+
+    // ✅ WebFlux (WebClient 사용)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    // JSON 데이터 처리를 위한 Jackson
+
+    // ✅ JSON 데이터 처리
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    // Spring Boot Starter Test (JUnit5 포함)
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // ✅ Redis 클라이언트
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // ✅ 테스트 관련 의존성 추가
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // ✅ Testcontainers - Redis 테스트 용 (버전 명시)
+    testImplementation 'org.testcontainers:testcontainers:1.19.7'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
 }
 
 dependencyManagement {

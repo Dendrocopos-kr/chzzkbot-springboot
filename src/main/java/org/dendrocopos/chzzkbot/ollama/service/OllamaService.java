@@ -3,13 +3,19 @@ package org.dendrocopos.chzzkbot.ollama.service;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaMessage;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaRequest;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.ollama.service.impl.IollamaService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -31,12 +37,5 @@ public class OllamaService implements IollamaService {
      */
     public Mono<Boolean> isConnected() {
         return ollamaClient.isConnected();
-    }
-
-    /**
-     * ✅ 세션별 대화 기록 삭제 (사용자 요청 시)
-     */
-    public void clearChatHistory(HttpSession session) {
-        ollamaClient.clearChatHistory(session);
     }
 }
