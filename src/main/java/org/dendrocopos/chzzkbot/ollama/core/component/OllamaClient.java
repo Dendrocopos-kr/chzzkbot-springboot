@@ -49,7 +49,7 @@ public class OllamaClient {
     /**
      * ✅ 세션별 AI 응답 요청 (이전 대화 포함)
      */
-    public Flux<OllamaResponse> generateResponse(String sessionId, String userInput) {
+    public Flux<OllamaResponse> generateResponse(String sessionId/*, String userInput*/, OllamaRequest request) {
         //String sessionId = session.getId();
         log.info("✅ 사용자 세션 ID: {}", sessionId);
 
@@ -61,13 +61,15 @@ public class OllamaClient {
         if (history.size() >= MAX_HISTORY_SIZE) {
             history.pollFirst(); // 가장 오래된 메시지 제거
         }
-        history.add(OllamaMessage.builder()
-                .role("user")
-                .content(userInput)
-                .build());
+        history.add(request.getMessages().getFirst());
 
         // ✅ Ollama 요청 객체 생성 (대화 히스토리 포함)
-        OllamaRequest request = new OllamaRequest(new LinkedList<>(history));
+        //OllamaRequest request = new OllamaRequest(new LinkedList<>(history));
+        request = OllamaRequest.builder()
+                .model(request.getModel())
+                .messages(history)
+                .stream(request.isStream())
+                .build();
         log.info("request : {}", request);
 
         // ✅ AI 응답을 임시 저장할 StringBuilder

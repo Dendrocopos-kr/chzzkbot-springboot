@@ -24,6 +24,16 @@ body {
     overflow: hidden;
 }
 
+/* ✅ 채팅방 제목 스타일 */
+.chat-header {
+    background: #007bff;
+    color: white;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px;
+}
+
 /* ✅ 채팅 메시지 박스 */
 .chat-box {
     flex-grow: 1; /* ✅ Safari에서 높이 깨짐 방지 */
@@ -69,6 +79,23 @@ body {
     color: black;
     align-self: flex-start;
     border-bottom-left-radius: 2px;
+}
+
+/* ✅ AI 메시지 내 Markdown 스타일 */
+.message.bot pre {
+    background: #f4f4f4;
+    padding: 8px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: monospace;
+}
+
+.message.bot code {
+    background: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #d63384;
 }
 
 /* ✅ 입력창 컨테이너 */

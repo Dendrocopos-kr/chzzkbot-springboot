@@ -14,6 +14,7 @@ import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.dendrocopos.chzzkbot.core.utils.StringUtils;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaMessage;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaRequest;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
@@ -357,8 +358,14 @@ public class ChatMain {
                     .flatMapMany(connected -> {
                         if (Boolean.TRUE.equals(connected)) {
                             Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(session.getId(),
-                                    StringUtils.getSubstringAfterFirstSpace(commandInputMessage)
-                            );
+                                            OllamaRequest.builder().messages(
+                                                    List.of(
+                                                            OllamaMessage.builder()
+                                                                    .role("user")
+                                                                    .content(StringUtils.getSubstringAfterFirstSpace(commandInputMessage))
+                                                                    .build()
+                                                    )
+                                            ).build());
 
                             return responseFlux
                                     .takeUntil(OllamaResponse::isDone) // ✅ "done": true가 나오면 중단

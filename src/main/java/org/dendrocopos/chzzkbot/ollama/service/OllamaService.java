@@ -3,6 +3,7 @@ package org.dendrocopos.chzzkbot.ollama.service;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dendrocopos.chzzkbot.ollama.config.OllamaRequest;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaResponse;
 import org.dendrocopos.chzzkbot.ollama.core.component.OllamaClient;
 import org.dendrocopos.chzzkbot.ollama.service.impl.IollamaService;
@@ -20,8 +21,9 @@ public class OllamaService implements IollamaService {
     /**
      * ✅ 세션별 AI 응답 요청 (이전 대화 내역 포함)
      */
-    public Flux<OllamaResponse> getOllamachatResponse(String sessionId, String userInput) {
-        return ollamaClient.generateResponse(sessionId, userInput);
+    public Flux<OllamaResponse> getOllamachatResponse(String sessionId/*, String userInput*/, OllamaRequest request) {
+        //return ollamaClient.generateResponse(sessionId, userInput);
+        return ollamaClient.generateResponse(sessionId, request);
     }
 
     /**

@@ -36,7 +36,7 @@ public class OllamaController {
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<OllamaResponse>> OllamaChatPost(@RequestBody OllamaRequest request, HttpSession session) {
         log.info("🔹 세션 ID: {}", session.getId());
-        return ResponseEntity.ok(ollamaService.getOllamachatResponse(session.getId(), request.getMessages().getFirst().getContent()));
+        return ResponseEntity.ok(ollamaService.getOllamachatResponse(session.getId(), request ));
     }
 
     /**
