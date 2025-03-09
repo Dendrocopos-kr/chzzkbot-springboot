@@ -57,11 +57,15 @@ public class OllamaClient {
         LinkedList<OllamaMessage> history = chatHistory.computeIfAbsent(sessionId, k -> new LinkedList<>());
         log.info("session : {}, history : {}", sessionId, history);
 
-        // ✅ 새로운 사용자 입력 추가 (최대 개수 초과 시 오래된 데이터 삭제)
-        if (history.size() >= MAX_HISTORY_SIZE) {
-            history.pollFirst(); // 가장 오래된 메시지 제거
-        }
-        history.add(request.getMessages().getFirst());
+        // ✅ 중복을 제외한 새로운 메시지만 필터링하여 추가
+        request.getMessages().stream()
+                .filter(message -> !history.contains(message)) // ✅ 중복 메시지 방지
+                .forEach(message -> {
+                    if (history.size() >= MAX_HISTORY_SIZE) {
+                        history.pollFirst(); // ✅ 가장 오래된 메시지 제거
+                    }
+                    history.add(message);
+                });
 
         // ✅ Ollama 요청 객체 생성 (대화 히스토리 포함)
         //OllamaRequest request = new OllamaRequest(new LinkedList<>(history));

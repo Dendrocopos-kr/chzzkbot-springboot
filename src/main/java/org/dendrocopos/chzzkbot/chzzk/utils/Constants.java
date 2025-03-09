@@ -25,5 +25,6 @@ public class Constants {
     public static final String OPEN_DATE = "openDate";
     public static final String CLOSE_DATE = "closeDate";
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String STATUS_OPEN = "OPEN";
 
 }

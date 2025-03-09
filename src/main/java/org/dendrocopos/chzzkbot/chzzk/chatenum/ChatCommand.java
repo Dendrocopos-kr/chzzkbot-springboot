@@ -2,7 +2,8 @@ package org.dendrocopos.chzzkbot.chzzk.chatenum;
 
 import lombok.Getter;
 
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Getter
 public enum ChatCommand {
@@ -21,7 +22,9 @@ public enum ChatCommand {
     NOTICE(94010),
     PENALTY(94015),
     SEND_CHAT(3101),
-    MEMBER_SYNC(94201);//Member Sync 멤버 목록 동기화.
+    MEMBER_SYNC(94201), // ✅ Member Sync 멤버 목록 동기화
+    SUCCESS(13101)
+        ;
 
     private final int value;
 
@@ -29,13 +32,12 @@ public enum ChatCommand {
         this.value = value;
     }
 
-    public static Object getCommandValue(int value) {
-        for (ChatCommand cmd : values()) {
-            if (Objects.equals(cmd.value, value)) {
-                return cmd;
-            }
-        }
-        return value;
+    /**
+     * ✅ 안전한 반환 방식으로 변경 (Optional 사용)
+     */
+    public static Optional<ChatCommand> getCommand(int value) {
+        return Arrays.stream(values())
+                .filter(cmd -> cmd.value == value)
+                .findFirst();
     }
-
 }

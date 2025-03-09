@@ -1,6 +1,7 @@
 package org.dendrocopos.chzzkbot.chzzk.main;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
@@ -21,6 +22,7 @@ import org.dendrocopos.chzzkbot.chzzk.manager.AuthorizationManager;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -114,49 +116,151 @@ public class ChatMain {
         return openWebSocketJson;
     }
 
-    public void fetchChannelDetail() {
-        String searchChannelDetail = chzzkServices.reqChzzk("service/v2/channels/" + channelInfo.get("channelId") + "/live-detail").block();
-        HashMap channelDetail = gson.fromJson(searchChannelDetail, HashMap.class);
-        if (channelDetail.get("code").toString().equals(SUCCESS_CODE)) {
-            //log.info("searchChannelInfoDetail : {}", channelDetail.get("content"));
-            channelInfoDetail = ((LinkedTreeMap) channelDetail.get("content"));
+    public boolean fetchChannelDetail() {
+        try {
+            log.info("🔍 채널 상세 정보 조회 중...");
+
+            // ✅ API 요청 및 응답 받기
+            String searchChannelDetail = chzzkServices.reqChzzk(
+                    "service/v2/channels/" + channelInfo.get("channelId") + "/live-detail"
+            ).block();
+
+            if (searchChannelDetail == null) {
+                log.warn("⚠️ 채널 상세 정보 조회 실패: 응답이 null입니다.");
+                channelInfoDetail = null;
+                return false;
+            }
+
+            // ✅ JSON 파싱
+            HashMap<String, Object> channelDetail = gson.fromJson(searchChannelDetail, HashMap.class);
+
+            // ✅ 응답 코드 검증
+            if (SUCCESS_CODE.equals(channelDetail.get("code").toString())) {
+                channelInfoDetail = (LinkedTreeMap) channelDetail.get("content");
+                log.info("✅ 채널 상세 정보 조회 성공");
+                return true;
+            } else {
+                log.warn("⚠️ 채널 상세 정보 조회 실패: 응답 코드 {}", channelDetail.get("code"));
+                channelInfoDetail = null;
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("❌ 채널 상세 정보 조회 중 오류 발생: {}", e.getMessage(), e);
+            channelInfoDetail = null;
+            return false;
         }
     }
 
-    public void fetchChannelInfo() {
-        String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
-                .block();
-        log.info("channelSearch : {}", searchChannelInfo);
-        HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
-        channelInfo = processChannelSearch(searchChannelData);
-    }
 
-    public void fetchUserStatus() {
-        String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
-        HashMap myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
-        if (myInfoContent.get("code").toString().equals(SUCCESS_CODE)) {
-            log.info("search myInfo : {}", myInfoContent.get("content"));
-            myInfo = ((LinkedTreeMap) myInfoContent.get("content"));
+    public boolean fetchChannelInfo() {
+        try {
+            String searchChannelInfo = chzzkServices.reqChzzk("service/v1/search/channels?keyword=" + channelName + "&offset=0&size=13&withFirstChannelContent=false")
+                    .block();
+
+            log.debug("channelSearch : {}", searchChannelInfo);
+
+            if (searchChannelInfo == null || searchChannelInfo.isBlank()) {
+                log.warn("⚠ 채널 검색 결과가 비어 있습니다. (channelName: {})", channelName);
+                return false;
+            }
+
+            HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData = gson.fromJson(searchChannelInfo, HashMap.class);
+            channelInfo = processChannelSearch(searchChannelData);
+
+            return true;
+        } catch (Exception e) {
+            log.error("❌ 채널 정보를 가져오는 중 오류 발생 (channelName: {})", channelName, e);
+            return false;
         }
     }
 
-    public void fetchChatChannelInfo() {
-        String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
-        HashMap searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
-        if (searchChatChannel.get("code").toString().equals(SUCCESS_CODE)) {
-            log.info("search chatChannelInfo : {}", searchChatChannel.get("content"));
-            chatChannelInfo = ((LinkedTreeMap) searchChatChannel.get("content"));
+
+    public boolean fetchUserStatus() {
+        try {
+            String searchMyInfo = chzzkServices.reqGame("nng_main/v1/user/getUserStatus").block();
+
+            if (searchMyInfo == null || searchMyInfo.isBlank()) {
+                log.warn("⚠ 사용자 상태 정보를 가져올 수 없습니다.");
+                return false;
+            }
+
+            HashMap<String, Object> myInfoContent = gson.fromJson(searchMyInfo, HashMap.class);
+
+            if (SUCCESS_CODE.equals(myInfoContent.get("code").toString())) {
+                //log.info("✅ 검색된 사용자 정보: {}", myInfoContent.get("content"));
+                myInfo = (LinkedTreeMap<String, Object>) myInfoContent.get("content");
+                return true;
+            } else {
+                log.warn("⚠ 사용자 상태 요청 실패: {}", myInfoContent);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("❌ 사용자 상태 정보를 가져오는 중 오류 발생", e);
+            return false;
         }
     }
 
-    public void fetchToken() {
-        String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId=" + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
-        HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
-        if (searchToken.get("code").toString().equals(SUCCESS_CODE)) {
-            log.info("search tokenInfo : {}", searchToken.get("content"));
-            tokenInfo = ((LinkedTreeMap) searchToken.get("content"));
+
+    public boolean fetchChatChannelInfo() {
+        try {
+            String searchChatChannelInfo = chzzkServices.getStatus("polling/v2/channels/" + channelInfo.get("channelId") + "/live-status").block();
+
+            if (searchChatChannelInfo == null || searchChatChannelInfo.isBlank()) {
+                log.warn("⚠ 채팅 채널 정보 응답이 비어 있습니다.");
+                return false;
+            }
+
+            HashMap<String, Object> searchChatChannel = gson.fromJson(searchChatChannelInfo, HashMap.class);
+
+            if (searchChatChannel != null && SUCCESS_CODE.equals(searchChatChannel.get("code").toString())) {
+                //log.info("✅ 채팅 채널 정보 검색 결과: {}", searchChatChannel.get("content"));
+                log.info("✅ 채팅 채널 정보 검색 성공");
+                chatChannelInfo = (LinkedTreeMap<String, Object>) searchChatChannel.get("content");
+                return true;
+            } else {
+                log.warn("⚠ 채팅 채널 정보 검색 실패: {}", searchChatChannel);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("❌ 채팅 채널 정보를 가져오는 중 오류 발생: {}", e.getMessage(), e);
+            return false;
         }
     }
+
+
+    public boolean fetchToken() {
+        try {
+            String searchTokenInfo = chzzkServices.reqGame("nng_main/v1/chats/access-token?channelId="
+                    + chatChannelInfo.get("chatChannelId") + "&chatType=STREAMING").block();
+
+            if (searchTokenInfo == null || searchTokenInfo.isBlank()) {
+                log.warn("⚠️ API 응답이 비어있음.");
+                return false;
+            }
+
+            HashMap searchToken = gson.fromJson(searchTokenInfo, HashMap.class);
+
+            if (searchToken.containsKey("code") && SUCCESS_CODE.equals(searchToken.get("code").toString())) {
+                //log.info("✅ 토큰 검색 성공: {}", searchToken.get("content"));
+                tokenInfo = (LinkedTreeMap) searchToken.get("content");
+                return true;
+            } else {
+                log.warn("⚠️ 토큰 검색 실패: 응답 코드 = {}", searchToken.get("code"));
+                return false;
+            }
+
+        } catch (JsonSyntaxException e) {
+            log.error("❌ JSON 파싱 오류: {}", e.getMessage(), e);
+            return false;
+        } catch (WebClientResponseException e) {
+            log.error("❌ 웹 요청 실패 (HTTP 상태 코드: {}): {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            return false;
+        } catch (Exception e) {
+            log.error("❌ 토큰 조회 중 알 수 없는 오류 발생: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
 
     // 웹소켓 연결 종료 코드
     public void stopWebSocketConnection() {
@@ -167,17 +271,31 @@ public class ChatMain {
     }
 
     public boolean isServerIdChange() {
-        if (this.serverId == 0) {
-            return true;
+        try {
+            if (this.serverId == 0) {
+                log.warn("⚠️ 서버 ID가 0입니다. 새로운 서버 ID를 계산합니다.");
+                return true; // ID가 설정되지 않은 경우 변경 필요
+            }
+
+            int calculatedServerId = calculateServerId();
+            boolean isChanged = calculatedServerId == this.serverId;
+
+            log.info("🔄 서버 ID 확인: 기존={}, 새 계산={}", this.serverId, calculatedServerId);
+            return isChanged;
+        } catch (Exception e) {
+            log.error("❌ 서버 ID 검증 실패: {}", e.getMessage(), e);
+            return false;
         }
-        int checkingServerId = Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
-                .reduce(0, Integer::sum)) % 9 + 1;
-        return checkingServerId == this.serverId;
     }
 
     private int calculateServerId() {
-        return Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
-                .reduce(0, Integer::sum)) % 9 + 1;
+        try {
+            return Math.abs(chatChannelInfo.get("chatChannelId").toString().chars()
+                    .reduce(0, Integer::sum)) % 9 + 1;
+        } catch (Exception e) {
+            log.error("❌ 서버 ID 계산 오류: {}", e.getMessage(), e);
+            return -1; // 서버 ID 계산에 실패하면 -1 반환
+        }
     }
 
     private HashMap<String, Object> constructPongCmd() {
@@ -251,40 +369,48 @@ public class ChatMain {
     }
 
     private void performRequestBasedOn(Integer command, Map<String, Object> messageContent, WebSocketSession session) {
-        switch (ChatCommand.getCommandValue(command)) {
-            case ChatCommand.PING:
-            case ChatCommand.PONG:
-            case ChatCommand.CONNECT:
-            case ChatCommand.REQUEST_RECENT_CHAT:
-            case ChatCommand.RECENT_CHAT:
-            case ChatCommand.EVENT:
-            case ChatCommand.KICK:
-            case ChatCommand.BLOCK:
-            case ChatCommand.BLIND:
-            case ChatCommand.NOTICE:
-            case ChatCommand.PENALTY:
-            case ChatCommand.SEND_CHAT:
-            case ChatCommand.MEMBER_SYNC:
-                logInfoFor((ChatCommand) ChatCommand.getCommandValue(command));
-                break;
-            case ChatCommand.CONNECTED:
-                logInfoFor(ChatCommand.CONNECTED);
-                bdy.put("sid", ((LinkedTreeMap) messageContent.get("bdy")).get("sid"));
-                openWebSocketJson.put("bdy", bdy);
-                log.info("openWebSocketJson : {}", openWebSocketJson);
-                session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
-                sendMessageToUser(session, announcementMessage, initializeMessageSendOptions());
-                break;
-            case ChatCommand.CHAT:
-                handleChatCommand(messageContent, session);
-                break;
-            case ChatCommand.DONATION:
-                handleDonationCommand(messageContent);
-                break;
-            default:
-                log.info("messageContent : {}", messageContent);
-                log.info("Unknown command : {}", command);
-                break;
+        Optional<ChatCommand> optionalCommand = ChatCommand.getCommand(command);
+
+        if (optionalCommand.isPresent()) {
+            ChatCommand chatCommand = optionalCommand.get();
+
+            switch (chatCommand) {
+                case PING, PONG, CONNECT, REQUEST_RECENT_CHAT, RECENT_CHAT, EVENT,
+                     KICK, BLOCK, BLIND, NOTICE, PENALTY, SEND_CHAT, MEMBER_SYNC,SUCCESS:
+                    log.info("[COMMAND] {} ({}) 실행", chatCommand.name(), chatCommand.getValue());
+                    break;
+
+                case CONNECTED:
+                    log.info("[COMMAND] {} ({}): 연결됨", chatCommand.name(), chatCommand.getValue());
+
+                    // WebSocket 세션 ID 저장
+                    bdy.put("sid", ((LinkedTreeMap<?, ?>) messageContent.get("bdy")).get("sid"));
+                    openWebSocketJson.put("bdy", bdy);
+
+                    log.debug("[WEBSOCKET] 초기 연결 데이터: {}", openWebSocketJson);
+
+                    // WebSocket 메시지 전송
+                    session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
+
+                    // 사용자에게 안내 메시지 전송
+                    sendMessageToUser(session, announcementMessage, initializeMessageSendOptions());
+                    break;
+
+                case CHAT:
+                    handleChatCommand(messageContent, session);
+                    break;
+
+                case DONATION:
+                    handleDonationCommand(messageContent);
+                    break;
+
+                default:
+                    log.warn("[WARNING] 알 수 없는 명령어 수신: {} (데이터: {})", command, messageContent);
+                    break;
+            }
+        } else {
+            // ✅ 알 수 없는 명령어일 경우 그대로 출력
+            log.warn("[UNKNOWN COMMAND] 알 수 없는 명령어: {}", command);
         }
     }
 
@@ -317,10 +443,6 @@ public class ChatMain {
                 getNickname(messageContent),
                 getMsg(messageContent)
         );
-    }
-
-    private void logInfoFor(ChatCommand command) {
-        log.info("{} : {}", command.name(), command.getValue());
     }
 
     private void sendCommandMessage(WebSocketSession session, HashMap userInfo, String commandInputMessage) {
@@ -360,6 +482,10 @@ public class ChatMain {
                             Flux<OllamaResponse> responseFlux = ollamaClient.generateResponse(session.getId(),
                                             OllamaRequest.builder().messages(
                                                     List.of(
+                                                            OllamaMessage.builder()
+                                                                    .role("system")
+                                                                    .content("text로만 대답해줘.")
+                                                                    .build(),
                                                             OllamaMessage.builder()
                                                                     .role("user")
                                                                     .content(StringUtils.getSubstringAfterFirstSpace(commandInputMessage))
@@ -603,7 +729,7 @@ public class ChatMain {
         return messageExtras;
     }
 
-    private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
+    /*private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
         for (String key : searchChannelData.keySet()) {
             if (CONTENT.equals(key)) {
                 LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>> content = searchChannelData.get(CONTENT);
@@ -619,6 +745,55 @@ public class ChatMain {
             }
         }
         return null;
+    }*/
+    private LinkedTreeMap<String, Object> processChannelSearch(HashMap<String, LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>>> searchChannelData) {
+        try {
+            if (searchChannelData == null || searchChannelData.isEmpty()) {
+                log.warn("⚠️ 채널 검색 데이터가 비어 있습니다.");
+                return null;
+            }
+
+            if (!searchChannelData.containsKey(CONTENT)) {
+                log.warn("⚠️ '{}' 키를 찾을 수 없습니다.", CONTENT);
+                return null;
+            }
+
+            LinkedTreeMap<String, List<LinkedTreeMap<String, Object>>> content = searchChannelData.get(CONTENT);
+            if (content == null || content.isEmpty()) {
+                log.warn("⚠️ '{}' 데이터가 비어 있습니다.", CONTENT);
+                return null;
+            }
+
+            if (!content.containsKey(DATA)) {
+                log.warn("⚠️ '{}' 키를 찾을 수 없습니다.", DATA);
+                return null;
+            }
+
+            List<LinkedTreeMap<String, Object>> dataList = content.get(DATA);
+            if (dataList == null || dataList.isEmpty()) {
+                log.warn("⚠️ '{}' 리스트가 비어 있습니다.", DATA);
+                return null;
+            }
+
+            LinkedTreeMap<String, Object> channelInfo = dataList.getFirst();
+            if (channelInfo == null) {
+                log.warn("⚠️ 채널 정보가 null입니다.");
+                return null;
+            }
+
+            log.info("🔍 검색된 채널 정보: {}", channelInfo);
+
+            if (!channelInfo.containsKey("channel")) {
+                log.warn("⚠️ 'channel' 키를 찾을 수 없습니다.");
+                return null;
+            }
+
+            return (LinkedTreeMap<String, Object>) channelInfo.get("channel");
+        } catch (Exception e) {
+            log.error("❌ 채널 검색 처리 중 오류 발생: {}", e.getMessage(), e);
+            return null;
+        }
     }
+
 
 }
