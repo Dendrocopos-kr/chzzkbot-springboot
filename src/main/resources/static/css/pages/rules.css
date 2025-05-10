@@ -1,0 +1,216 @@
+/* 규칙 페이지 컨테이너 스타일 */
+.rules-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 헤더 스타일 */
+.rules-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.rules-header h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.rules-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 규칙 섹션 스타일 */
+.rules-section {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px var(--shadow-color);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.rules-section h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--pink-primary);
+}
+
+/* 규칙 리스트 스타일 */
+.rules-list {
+    list-style: none;
+    padding: 0;
+}
+
+.rule-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rule-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.rule-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    background: var(--pink-primary);
+    color: white;
+    border-radius: 50%;
+    margin-right: 1rem;
+    font-weight: bold;
+}
+
+.rule-content {
+    flex: 1;
+}
+
+.rule-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.rule-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* 중요 규칙 강조 스타일 */
+.rule-important {
+    border-left: 4px solid var(--pink-primary);
+    padding-left: 1.5rem;
+    background: var(--bg-primary);
+}
+
+/* 섹션 구분선 */
+.section-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--pink-primary), transparent);
+    margin: 3rem 0;
+}
+
+/* 카테고리 태그 스타일 */
+.rule-category {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: var(--pink-light);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* 다크 모드 스타일 */
+[data-theme="dark"] .rule-item {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .rule-important {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .rules-container {
+        padding: 1rem;
+    }
+
+    .rules-header h1 {
+        font-size: 2rem;
+    }
+
+    .rules-section {
+        padding: 1.5rem;
+    }
+
+    .rules-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .rule-item {
+        flex-direction: column;
+    }
+
+    .rule-number {
+        margin-bottom: 1rem;
+    }
+
+    .rule-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 스크롤바 스타일 */
+.rules-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rules-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.rules-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.rules-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 규칙 설명 링크 스타일 */
+.rule-description a {
+    color: var(--pink-primary);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--pink-primary);
+    transition: color 0.2s ease;
+}
+
+.rule-description a:hover {
+    color: var(--pink-dark);
+}
+
+/* 규칙 업데이트 날짜 스타일 */
+.rules-update-date {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 2rem;
+    font-style: italic;
+}

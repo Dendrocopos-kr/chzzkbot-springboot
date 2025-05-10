@@ -1,7 +1,42 @@
 class OllamaMessage {
     constructor(role, content) {
         this.role = role;    // "user" or "assistant"
-        this.content = content; // 메시지 내용
+        this.content = content;
+        this.element = this.createElement();
+    }
+
+    createElement() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${this.role === 'user' ? 'user-message' : 'ai-message'}`;
+
+        // 아바타 생성
+        const avatarDiv = document.createElement('div');
+        if (this.role === 'user') {
+            avatarDiv.className = 'user-avatar';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-user';
+            avatarDiv.appendChild(icon);
+        } else {
+            avatarDiv.className = 'ai-avatar';
+        }
+
+        // 메시지 내용 컨테이너
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        
+        if (this.role === 'assistant') {
+            contentDiv.innerHTML = marked.parse(this.content);
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        } else {
+            contentDiv.textContent = this.content;
+        }
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+
+        return messageDiv;
     }
 
     // JSON 데이터를 OllamaMessage 객체로 변환

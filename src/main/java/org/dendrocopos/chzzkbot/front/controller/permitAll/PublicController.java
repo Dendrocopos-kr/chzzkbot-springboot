@@ -10,11 +10,11 @@ public class PublicController {
 
     @GetMapping(value = "/register")
     public String showRegister() {
-        return "/html/permitAll/register_form";
+        return "/common/register_form";
     }
 
     @GetMapping(value = "/rules")
     public String showRulesPage() {
-        return "/html/permitAll/rules";
+        return "/common/rules";
     }
 }

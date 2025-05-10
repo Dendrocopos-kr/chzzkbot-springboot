@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>오류 발생</title>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <h1>오류가 발생했습니다</h1>
+            <p th:text="${error}">오류 메시지</p>
+            <a href="/" class="btn btn-primary">홈으로 돌아가기</a>
+        </div>
+    </main>
+</body>
+</html>

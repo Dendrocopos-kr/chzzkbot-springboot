@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}">
+<head>
+    <title>뮤쪽이 - 소개</title>
+    <th:block th:fragment="additionalCss">
+        <link rel="stylesheet" th:href="@{/css/pages/about.css}">
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="container">
+        <section class="about-section">
+            <h1 class="about-title">
+                <i class="fas fa-robot"></i> 
+                뮤쪽이 프로젝트 소개
+            </h1>
+            
+            <div class="about-content">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h2>AI 채팅봇</h2>
+                    <p>뮤쪽이는 사용자와 자연스러운 대화가 가능한 AI 채팅봇입니다. Ollama를 기반으로 하여 다양한 주제에 대해 대화할 수 있습니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h2>다양한 명령어</h2>
+                    <p>간단한 명령어를 통해 다양한 기능을 사용할 수 있습니다. 명령어 목록에서 모든 기능을 확인하실 수 있습니다.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h2>실시간 응답</h2>
+                    <p>사용자의 메시지에 즉각적으로 응답하며, 각 명령어별 쿨타임 관리를 통해 안정적인 서비스를 제공합니다.</p>
+                </div>
+            </div>
+
+            <section class="tech-stack">
+                <h2>
+                    <i class="fas fa-layer-group"></i>
+                    기술 스택
+                </h2>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <i class="fab fa-java"></i>
+                        <span>Java</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-leaf"></i>
+                        <span>Spring Boot</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-js"></i>
+                        <span>JavaScript</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-html5"></i>
+                        <span>HTML5</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-css3-alt"></i>
+                        <span>CSS3</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="future-plans">
+                <h2>
+                    <i class="fas fa-rocket"></i>
+                    향후 계획
+                </h2>
+                <ul class="plans-list">
+                    <li><i class="fas fa-check-circle"></i> 더 많은 AI 모델 지원</li>
+                    <li><i class="fas fa-check-circle"></i> 사용자 맞춤형 응답 개선</li>
+                    <li><i class="fas fa-check-circle"></i> 다국어 지원</li>
+                    <li><i class="fas fa-check-circle"></i> Discord 연동 지원</li>
+                </ul>
+            </section>
+            
+            <section class="contact-info">
+                <h2>
+                    <i class="fas fa-envelope"></i>
+                    문의하기
+                </h2>
+                <p>프로젝트에 대한 문의나 제안이 있으시다면 아래 링크를 통해 연락해주세요.</p>
+                <div class="contact-links">
+                    <a href="https://github.com/Dendrocopos-kr/chzzkbot-springboot" target="_blank" class="github-link">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="/contact" class="contact-page-link">
+                        <i class="fas fa-paper-plane"></i> 문의하기
+                    </a>
+                </div>
+            </section>
+        </section>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <script th:src="@{/js/about.js}"></script>
+</th:block>
+</body>
+</html>

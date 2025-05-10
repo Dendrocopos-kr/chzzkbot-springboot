@@ -33,11 +33,23 @@ spring:
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
     clear-checksums: false
+  data:
+    redis:
+      host: localhost  # Docker Compose의 redis 서비스 이름
+      port: 6379
+      timeout: 60000  # 연결 타임아웃 (밀리초)
+      lettuce:
+        pool:
+          max-active: 10  # 최대 활성 연결 수
+          max-idle: 5  # 최대 유휴 연결 수
+          min-idle: 1  # 최소 유휴 연결 수
+          time-between-eviction-runs: 1000ms  # 유휴 연결 검사 주기
 server:
   port: 8180
 security:
-  allowed-uris: /,/css/**,/js/**,/img/**,/public/**,/api/**
-  authenticated-uris: /commandList
+  allowed-uris: /,/css/**,/js/**,/img/**,/api/**,/commands/**,/about/**,/contact/**,/ollama/**,/rules/**
+  authenticated-uris: /user/**
+  admin-uris: /admin/**
 logging:
   level:
     org.springframework.messaging: debug
@@ -50,6 +62,9 @@ chzzk:
     name: "뮤쪽이"
     openingMessage: "나님 등장!"
     closingMessage: "나님도 자러갈게..."
+  api:
+    clientId: 013e9f2e-9e0b-4e0d-bdd1-b6489a0b812c
+    clientSecret: UQXaUOzpAlubbFlYz9EJVHtDz6KXvItDoKyFf8vW8us
   ChannelName: 뮤로나
   URL:
     chzzkBaseURL: https://api.chzzk.naver.com/

@@ -50,6 +50,6 @@ public class ApiController {
             e.printStackTrace();
         }
 
-        return "/html/permitAll/api/path";
+        return "/common/api/path";
     }
 }

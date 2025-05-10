@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}">
+<head>
+    <title>뮤쪽이 - 홈</title>
+    <th:block th:fragment="additionalCss">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.css">
+        <link rel="stylesheet" th:href="@{/css/pages/index.css}">
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="container">
+        <h1>뮤쪽이와 대화하기</h1>
+        <p>AI 뮤쪽이와 자유롭게 대화해보세요!</p>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <span class="chat-title">뮤쪽이 AI</span>
+            <div class="chat-controls">
+                <button id="clear-btn" title="대화 내용 지우기">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div id="chat-box" class="chat-box"></div>
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea id="user-input" 
+                         placeholder="메시지를 입력하세요... (Shift + Enter: 줄바꿈, Enter: 전송)" 
+                         rows="1"></textarea>
+                <button id="send-btn" class="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
+    <script th:src="@{/js/home.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/contrib/auto-render.min.js"></script>
+    <script th:src="@{/js/ollamaMessage.js}"></script>
+    <script th:src="@{/js/ollama.js}"></script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,182 @@
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* 공통 페이지 스타일 */
+.page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-4);
+    padding: var(--spacing-4) 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-description {
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+/* 카드 스타일 */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--spacing-3);
+    margin-bottom: var(--spacing-3);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* 링크 스타일 */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 구분선 */
+hr {
+    border: 0;
+    border-top: 1px solid var(--divider-color);
+    margin: 1rem 0;
+}
+
+/* 버튼 스타일 */
+.btn {
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+/* 버튼 기본 스타일 */
+.btn {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: var(--text-light);
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: var(--text-inverse);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--gradient-secondary);
+    color: var(--text-primary);
+}
+
+/* 폼 스타일 */
+.form-group {
+    margin-bottom: var(--spacing-3);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-1);
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-2);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--lavender-pink);
+}
+
+/* 입력 필드 기본 스타일 */
+input, textarea, select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* 그리드 시스템 */
+.grid {
+    display: grid;
+    gap: var(--spacing-3);
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 테이블 스타일 */
+table {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+th, td {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 알림 메시지 스타일 */
+.alert {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.alert-success { border-left: 4px solid var(--success); }
+.alert-warning { border-left: 4px solid var(--warning); }
+.alert-error { border-left: 4px solid var(--error); }
+.alert-info { border-left: 4px solid var(--info); }

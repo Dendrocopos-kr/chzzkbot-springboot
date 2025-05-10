@@ -1,0 +1,273 @@
+/* commands.css */
+.commands-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 헤더 스타일 */
+.commands-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.commands-header h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.commands-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* 검색 박스 스타일 */
+.search-box {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--pink-primary);
+    box-shadow: 0 0 0 3px rgba(var(--pink-primary-rgb), 0.1);
+}
+
+/* 검색 아이콘 스타일 */
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+/* 테이블 컨테이너 스타일 */
+.table-container {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    overflow: hidden;
+}
+
+/* 테이블 스타일 */
+.commands-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-secondary);
+}
+
+.commands-table th,
+.commands-table td {
+    padding: 1.2rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.commands-table th {
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.commands-table th:hover .sort-icon {
+    opacity: 1;
+}
+
+.commands-table th i {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.commands-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.commands-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+/* 명령어 태그 스타일 */
+.command-tag {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: var(--pink-primary);
+    color: white;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+/* 쿨타임 뱃지 스타일 */
+.cooldown-badge {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+/* 검색 결과 없음 스타일 */
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+/* 검색 결과 없음 아이콘 스타일 */
+.no-results i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .commands-header h1 {
+        font-size: 2rem;
+    }
+
+    .commands-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .commands-table th,
+    .commands-table td {
+        padding: 1rem 0.8rem;
+    }
+
+    .command-tag {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+/* 스크롤바 스타일 */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 다크 모드 스타일 */
+[data-theme="dark"] .commands-table {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .search-box input {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .cooldown-badge {
+    background: var(--bg-primary);
+}
+
+/* 검색 클리어 버튼 스타일 */
+.search-clear {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: none;
+}
+
+.search-clear:hover {
+    color: var(--pink-primary);
+}
+
+/* 정렬 아이콘 스타일 */
+.sort-icon {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    vertical-align: middle;
+}
+
+.commands-table th i {
+    transition: transform 0.2s ease;
+}
+
+.commands-table th:hover i {
+    opacity: 1;
+}
+
+.fa-sort-up {
+    transform: translateY(2px);
+}
+
+.fa-sort-down {
+    transform: translateY(-2px);
+}
+
+/* 복사 효과 애니메이션 */
+.command-tag {
+    transition: all 0.3s ease;
+}
+
+.command-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.command-tag.copied {
+    background: var(--mint) !important;
+}

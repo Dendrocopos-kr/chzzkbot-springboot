@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, content, additionalCss, additionalScripts)"
+      lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" th:content="${metaDescription}">
+    <title th:replace="${title}">Default Title</title>
+    
+    <!-- 기본 CSS (기초 스타일 및 변수 정의) -->
+    <link rel="stylesheet" th:href="@{/css/base/reset.css}"/>
+    <link rel="stylesheet" th:href="@{/css/base/variables.css}"/>
+    <link rel="stylesheet" th:href="@{/css/base/typography.css}"/>
+    <link rel="stylesheet" th:href="@{/css/base/layout.css}"/>
+    
+    <!-- 유틸리티 CSS -->
+    <link rel="stylesheet" th:href="@{/css/utils/spacing.css}"/>
+    
+    <!-- 컴포넌트 CSS -->
+    <link rel="stylesheet" th:href="@{/css/components/common.css}"/>
+    <link rel="stylesheet" th:href="@{/css/components/buttons.css}"/>
+    <link rel="stylesheet" th:href="@{/css/components/forms.css}"/>
+    
+    <!-- 레이아웃 CSS -->
+    <link rel="stylesheet" th:href="@{/css/layouts/header.css}"/>
+    <link rel="stylesheet" th:href="@{/css/layouts/footer.css}"/>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    
+    <!-- head 섹션 내 CSS 링크 부분에 추가 -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}"/>
+    
+    <!-- 페이지별 추가 CSS -->
+    <th:block th:replace="${additionalCss}" />
+</head>
+<body>
+    <header th:replace="~{layout/fragments/header :: header}"></header>
+    
+    <main th:replace="${content}">
+        <p>기본 콘텐츠입니다.</p>
+    </main>
+    
+    <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
+    
+    <!-- 공통 스크립트 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" defer></script>
+    
+    <!-- 페이지별 추가 스크립트 -->
+    <th:block th:replace="${additionalScripts}" />
+    
+    <!-- body 끝부분의 스크립트 섹션에 추가 -->
+    <script th:src="@{/js/theme.js}"></script>
+</body>
+</html>

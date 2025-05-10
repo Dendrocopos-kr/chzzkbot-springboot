@@ -1,0 +1,71 @@
+/* 라이트 모드 (기본) */
+:root {
+    --pink-primary: #FF4E93;
+    --pink-light: #FFA6C7;
+    --pink-dark: #CC3C75;
+    --mint: #86E3CE;
+    
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8F9FA;
+    --bg-tertiary: #F1F3F5;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --border-color: #DEE2E6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #FFFFFF;
+    --nav-bg: #FFFFFF;
+}
+
+/* 다크 모드 */
+[data-theme="dark"] {
+    --bg-primary: #1A1B1E;
+    --bg-secondary: #2C2D31;
+    --bg-tertiary: #353940;
+    --text-primary: #E9ECEF;
+    --text-secondary: #ADB5BD;
+    --border-color: #4A4B50;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --input-bg: #2C2D31;
+    --nav-bg: #1A1B1E;
+}
+
+/* 테마 토글 버튼 스타일 */
+.theme-toggle {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+.theme-toggle .light-icon {
+    display: none;
+}
+
+.theme-toggle .dark-icon {
+    display: block;
+}
+
+[data-theme="dark"] .light-icon {
+    display: block;
+}
+
+[data-theme="dark"] .dark-icon {
+    display: none;
+}
+
+/* 전환 애니메이션 */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

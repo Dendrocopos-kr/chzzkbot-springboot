@@ -1,0 +1,52 @@
+footer {
+    background: var(--gradient-secondary);
+    color: var(--text-primary);
+    padding: var(--spacing-4) 0;
+    margin-top: auto;
+    border-top: 3px solid var(--lavender-pink);
+}
+
+.footer-content {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.footer-content p {
+    margin: 0.5rem 0;
+}
+
+.footer-content p {
+    margin: var(--spacing-1) 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.footer-content p:first-child {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.footer-content p:last-child {
+    color: var(--text-primary);
+}
+
+/* 하트 애니메이션 */
+.footer-content p:last-child span {
+    color: var(--deep-pink);
+    animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.site-footer {
+    background-color: var(--footer-bg);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}

@@ -20,7 +20,7 @@ public class Scheduler {
      * ✅ 1분마다 채팅방 연결 상태를 확인하고, 필요 시 WebSocket을 엽니다.
      */
     @Scheduled(cron = "0 * * * * *") // 1분마다 실행
-    //@Scheduled(cron = "*/5 * * * * *") // 1분마다 실행
+    //@Scheduled(cron = "*/10 * * * * *") // 10초마다 실행
     public void checkConnection() {
         log.info("🔄 채팅방 연결 확인 중...");
         if (isChatOpen()) {
@@ -31,7 +31,7 @@ public class Scheduler {
     /**
      * ✅ 60분마다 실행하여 채팅방이 닫혀야 하는 경우 WebSocket을 닫습니다.
      */
-    @Scheduled(cron = "0 0 * * * *") // 60분마다 실행
+    @Scheduled(cron = "0 * * * * *") // 1분마다 실행
     public void disconnect() {
         log.info("🔌 주기적인 연결 종료 검사...");
         if (!isChatOpen()) {

@@ -23,12 +23,13 @@ public class OllamaController {
     private final OllamaService ollamaService;
 
     /**
-     * ✅ 채팅 페이지 반환 (타임리프 적용)
+     * ✅ /ollama/chat GET 요청을 메인 페이지로 리디렉션
      */
-    @GetMapping(value = "/chat")
-    public String ollamaChatGet(Model model) {
-        return "/html/permitAll/ollama/ollamaChat";
+    @GetMapping("/chat")
+    public String redirectToHome() {
+        return "redirect:/";
     }
+
 
     /**
      * ✅ AI 응답 요청 (세션별 대화 내역 포함)

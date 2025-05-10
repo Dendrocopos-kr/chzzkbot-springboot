@@ -272,16 +272,14 @@ public class ChatMain {
 
     public boolean isServerIdChange() {
         try {
-            if (this.serverId == 0) {
-                log.warn("⚠️ 서버 ID가 0입니다. 새로운 서버 ID를 계산합니다.");
-                this.serverId = calculateServerId();
-                return true; // ID가 설정되지 않은 경우 변경 필요
-            }
-
             int calculatedServerId = calculateServerId();
             boolean isChanged = calculatedServerId == this.serverId;
 
-            log.info("🔄 서버 ID 확인: 기존={}, 새 계산={}", this.serverId, calculatedServerId);
+            if( !isChanged ) {
+                log.info("🔄 서버 ID 확인: 기존={}, 새 계산={}", this.serverId, calculatedServerId);
+                this.serverId = calculateServerId();
+            }
+
             return isChanged;
         } catch (Exception e) {
             log.error("❌ 서버 ID 검증 실패: {}", e.getMessage(), e);
@@ -485,7 +483,7 @@ public class ChatMain {
                                                     List.of(
                                                             OllamaMessage.builder()
                                                                     .role("system")
-                                                                    .content("text로만 대답해줘.")
+                                                                    .content("text로만 대답해줘. 마크다운 쓰지말고, 최대한 짧게 요약해줘.")
                                                                     .build(),
                                                             OllamaMessage.builder()
                                                                     .role("user")

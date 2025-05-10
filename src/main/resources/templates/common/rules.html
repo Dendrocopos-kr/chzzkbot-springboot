@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}">
+<head>
+    <title>뮤쪽이 - 방송 규칙</title>
+    <th:block th:fragment="additionalCss">
+        <link rel="stylesheet" th:href="@{/css/pages/rules.css}"/>
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="rules-container">
+        <!-- 헤더 섹션 -->
+        <div class="rules-header">
+            <h1>방송 규칙</h1>
+            <p>즐거운 방송을 위해 꼭 지켜주세요!</p>
+        </div>
+
+        <!-- 메인 규칙 섹션 -->
+        <section class="rules-section">
+            <h2>시청자 규칙</h2>
+            <ul class="rules-list">
+                <!-- 중요 규칙 -->
+                <li class="rule-item rule-important">
+                    <div class="rule-number">1</div>
+                    <div class="rule-content">
+                        <span class="rule-category">필수</span>
+                        <h3 class="rule-title">성희롱 금지</h3>
+                        <p class="rule-description">정중한 성희롱도 절대 금지입니다.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">2</div>
+                    <div class="rule-content">
+                        <span class="rule-category">예의</span>
+                        <h3 class="rule-title">욕설 및 비방 금지</h3>
+                        <p class="rule-description">서로를 존중하는 채팅 문화를 만들어요.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">3</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">도배 금지</h3>
+                        <p class="rule-description">같은 내용의 반복적인 채팅은 금지됩니다.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">4</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">스포일러 금지</h3>
+                        <p class="rule-description">게임이나 컨텐츠의 스포일러는 금지됩니다.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">5</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">타 스트리머/시청자 언급 금지</h3>
+                        <p class="rule-description">다른 스트리머나 시청자의 닉네임을 언급하지 말아주세요.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item rule-important">
+                    <div class="rule-number">6</div>
+                    <div class="rule-content">
+                        <span class="rule-category">중요</span>
+                        <h3 class="rule-title">싸움/친목 금지</h3>
+                        <p class="rule-description">서로 싸우거나 친목 행위는 금지! 저랑 얘기해요.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">7</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">방송 분위기 존중</h3>
+                        <p class="rule-description">방송 흐름을 끊거나 분위기를 망치는 말은 금지됩니다.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">8</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">사적인 연락 금지</h3>
+                        <p class="rule-description">개인적인 연락이나 친분 요청은 금지됩니다.</p>
+                    </div>
+                </li>
+
+                <li class="rule-item">
+                    <div class="rule-number">9</div>
+                    <div class="rule-content">
+                        <h3 class="rule-title">훈수 금지</h3>
+                        <p class="rule-description">요청하지 않은 게임 플레이 조언은 삼가해 주세요.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- 경고 섹션 -->
+        <section class="rules-section">
+            <h2>규칙 위반시 조치사항</h2>
+            <div class="rule-item rule-important">
+                <div class="rule-content">
+                    <h3 class="rule-title">1차: 경고</h3>
+                    <p class="rule-description">규칙 위반 시 경고가 주어집니다.</p>
+                </div>
+            </div>
+            <div class="rule-item rule-important">
+                <div class="rule-content">
+                    <h3 class="rule-title">2차: 채팅 차단</h3>
+                    <p class="rule-description">경고 후에도 규칙을 위반할 경우 채팅이 차단됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 업데이트 날짜 -->
+        <div class="rules-update-date">
+            마지막 업데이트: 2024년 3월
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
+</th:block>
+</body>
+</html>

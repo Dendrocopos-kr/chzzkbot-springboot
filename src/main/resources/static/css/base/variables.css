@@ -1,0 +1,47 @@
+:root {
+    /* 기본 색상 */
+    --pink-primary: #FF4E93;
+    --pink-light: #FFA6C7;
+    --pink-dark: #CC3C75;
+    --mint: #86E3CE;
+    
+    /* 라이트 모드 기본 변수 */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8F9FA;
+    --bg-tertiary: #F1F3F5;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --border-color: #DEE2E6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #FFFFFF;
+    --nav-bg: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --hover-bg: #F8F9FA;
+    
+    /* 상태 색상 */
+    --success: #40C057;
+    --warning: #FD7E14;
+    --error: #FA5252;
+    --info: #228BE6;
+}
+
+[data-theme="dark"] {
+    /* 다크 모드 변수 */
+    --bg-primary: #1A1B1E;
+    --bg-secondary: #2C2D31;
+    --bg-tertiary: #353940;
+    --text-primary: #E9ECEF;
+    --text-secondary: #ADB5BD;
+    --border-color: #4A4B50;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --input-bg: #2C2D31;
+    --nav-bg: #1A1B1E;
+    --card-bg: #2C2D31;
+    --hover-bg: #353940;
+
+    /* 다크모드 상태 색상 */
+    --success: #51CF66;
+    --warning: #FF922B;
+    --error: #FF6B6B;
+    --info: #339AF0;
+}

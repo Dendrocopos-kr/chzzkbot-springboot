@@ -27,6 +27,8 @@ public class WebSecurityConfig {
     private String[] allowedUris;
     @Value("${security.authenticated-uris}")
     private String[] getAllowedUris;
+    @Value("${security.admin-uris}")
+    private String[] getAdminUris;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,6 +39,7 @@ public class WebSecurityConfig {
                         authorizationManagerRequestMatcherRegistry
                                 .requestMatchers(allowedUris).permitAll()
                                 .requestMatchers(getAllowedUris).authenticated()
+                                .requestMatchers(getAdminUris).hasRole("ADMIN")
                                 .anyRequest().denyAll()
                 )
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)

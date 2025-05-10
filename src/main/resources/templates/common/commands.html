@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}">
+<head>
+    <title>뮤쪽이 명령어 모음</title>
+    <th:block th:fragment="additionalCss">
+        <link rel="stylesheet" th:href="@{/css/pages/commands.css}">
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="commands-container">
+        <div class="commands-header">
+            <h1>뮤쪽이 명령어 모음</h1>
+            <p>채팅에서 사용할 수 있는 명령어들을 확인하세요!</p>
+        </div>
+
+        <div class="commands-wrapper">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="commandSearch" placeholder="명령어 검색...">
+            </div>
+
+            <div class="table-container">
+                <table class="commands-table">
+                    <thead>
+                    <tr>
+                        <th data-sort="command">
+                            명령어
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th data-sort="response">
+                            응답내용
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th data-sort="cooldown">
+                            쿨타임
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                        <th data-sort="lastCall">
+                            마지막 호출
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${data}">
+                        <td>
+                            <span class="command-tag" th:text="${item.cmdStr}"></span>
+                        </td>
+                        <td th:text="${item.cmdMsg}"></td>
+                        <td th:text="${item.cooldown + 'ms'}"></td>
+                        <td th:attr="data-time=${item.lastCommandTime}, data-formatted-time=${#temporals.format(item.lastCommandTime, 'yyyy-MM-dd HH:mm')}" 
+    th:text="${#temporals.format(item.lastCommandTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <p>검색 결과가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <script th:src="@{/js/commands.js}"></script>
+</th:block>
+</body>
+</html>

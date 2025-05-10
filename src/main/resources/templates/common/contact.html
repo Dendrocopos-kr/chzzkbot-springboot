@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}">
+<head>
+    <title>뮤쪽이 - 문의하기</title>
+    <th:block th:fragment="additionalCss">
+        <link rel="stylesheet" th:href="@{/css/pages/contact.css}">
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="container">
+        <section class="contact-section">
+            <h1 class="contact-title">
+                <i class="fas fa-envelope"></i> 
+                문의하기
+            </h1>
+            
+            <div class="contact-cards">
+                <div class="contact-card">
+                    <div class="card-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h2>이메일</h2>
+                    <p>문의사항이나 버그 리포트는 이메일로 보내주세요.</p>
+                    <a href="mailto:lunatic787973@gmail.com" class="contact-link">
+                        <i class="fas fa-paper-plane"></i>
+                        lunatic787973@gmail.com
+                    </a>
+                </div>
+
+                <div class="contact-card">
+                    <div class="card-icon">
+                        <i class="fab fa-discord"></i>
+                    </div>
+                    <h2>디스코드</h2>
+                    <p>빠른 응답이 필요하시다면 디스코드로 연락해주세요.</p>
+                    <div class="contact-link">
+                        <i class="fab fa-discord"></i>
+                        leucotos
+                    </div>
+                </div>
+
+                <div class="contact-card">
+                    <div class="card-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h2>GitHub</h2>
+                    <p>프로젝트에 기여하고 싶으시다면 GitHub을 방문해주세요.</p>
+                    <a href="https://github.com/Dendrocopos-kr/chzzkbot-springboot" target="_blank" class="contact-link">
+                        <i class="fab fa-github"></i>
+                        GitHub 저장소 방문하기
+                    </a>
+                </div>
+            </div>
+
+            <section class="faq-section">
+                <h2>
+                    <i class="fas fa-question-circle"></i>
+                    자주 묻는 질문
+                </h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-chevron-right"></i>
+                            뮤쪽이는 24시간 운영되나요?
+                        </div>
+                        <div class="faq-answer">
+                            네, 서버 점검 시간을 제외하고 24시간 운영됩니다.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-chevron-right"></i>
+                            응답이 늦거나 오류가 발생하면 어떻게 하나요?
+                        </div>
+                        <div class="faq-answer">
+                            디스코드나 이메일로 문의해 주시면 최대한 빠르게 확인하고 조치하겠습니다.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-chevron-right"></i>
+                            새로운 기능을 제안하고 싶어요!
+                        </div>
+                        <div class="faq-answer">
+                            언제든 환영합니다! 이메일이나 디스코드로 새로운 기능을 제안해 주세요.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <script th:src="@{/js/contact.js}"></script>
+</th:block>
+</body>
+</html>
