@@ -1,6 +1,6 @@
 package org.dendrocopos.chzzkbot.chzzk.nid;
 
 public class nid {
-    public static final String NID_AUT = "ESNoUtqFjf51S7+MURA/OzSAsgwxu2QIZ2/CLYr7txzflP+XN+pWNTM4iQy4Knhn";
-    public static final String NID_SES = "AAABrzmJZPuO5LiykySMX3HzYQaOqd9i+QsHLSv89U/KWYE11nqF0a7UHy0Du0ILJldnCjOn9cdNeeduWg+KOBkrdxcZd2BlREaya7P9kYYw1xoFCNSxBMOZCmhbL0KC3woIrzExdP6fFyY9/7fgUKDtYJ0vmU9Pkyl27cSbq/dwep+tJGx13RhJ+6yCD/67Na/a+lXV0Sm+/x7t2YXO5RwiRFq26KUhLm6zHBfw/Hpts4ULyw9D7Ic0pUUPZGgj4bkdg4DRiufWlqTx6vxVVs3gQIXk+CGb43Vy0gG2hr4J/mLdXTDcWyhZG+1svREcKapG3HHgtQwHSqJwc7KRtuzIkJUhIKauiM2Ly0ODxuc6LLGpcbGUK1AUZQao9m8DNQIJs7AWhUzUwlfszGZ14z3UyziIx6DNUmug45PhYll+Rlq/E2vfL0jOUNZdKSGfaR0CcCwVp8lShiwXxQCg0iaGpUxxCIqM4r69LehmBD/2H470bJCpxx8Xv9fjdZ7ZQRGBjWJCYXedl2uuP/UDDXTKbA7LbNgis4vJSvFuE55Uisq7Q49wscLgbfYStyyuzWzv6g==";
+    public static final String NID_AUT = "네이버 NID_AUT";
+    public static final String NID_SES = "네이버 NID_SES";
 }
