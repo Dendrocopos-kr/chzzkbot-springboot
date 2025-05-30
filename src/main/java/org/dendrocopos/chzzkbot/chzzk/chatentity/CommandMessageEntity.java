@@ -30,11 +30,14 @@ public class CommandMessageEntity {
 
     private Long counting = 0L;
 
+    private Boolean enabled = true;
+
     @PrePersist
     public void onPrePersist() {
         this.lastCommandTime = LocalDateTime.now();
         this.nickNameUse = false;
         this.counting = 0L;
+        this.enabled = true;
     }
 
 }

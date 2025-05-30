@@ -41,6 +41,10 @@
                             마지막 호출
                             <i class="fas fa-sort sort-icon"></i>
                         </th>
+                        <th data-sort="enabled">
+                            활성화
+                            <i class="fas fa-sort sort-icon"></i>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -52,6 +56,7 @@
                         <td th:text="${item.cooldown + 'ms'}"></td>
                         <td th:attr="data-time=${item.lastCommandTime}, data-formatted-time=${#temporals.format(item.lastCommandTime, 'yyyy-MM-dd HH:mm')}" 
     th:text="${#temporals.format(item.lastCommandTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${item.enabled ? '활성화' : '비활성화'}"></td>
                     </tr>
                     </tbody>
                 </table>

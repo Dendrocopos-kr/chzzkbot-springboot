@@ -448,7 +448,9 @@ public class ChatMain {
         if (authorizationManager.isSpecialUser(userInfo)) {
             return;
         }
-        List<CommandMessageEntity> commandList = messageRepository.findAll();
+        List<CommandMessageEntity> commandList = messageRepository.findAll()
+                .stream().filter(commandMessageEntity -> commandMessageEntity.getEnabled())
+                .toList();
 
         final AtomicReference<HashMap<String, Object>> messageSendOptions = initializeMessageSendOptions(); // Final
 
