@@ -449,8 +449,12 @@ public class ChatMain {
             return;
         }
         List<CommandMessageEntity> commandList = messageRepository.findAll()
-                .stream().filter(commandMessageEntity -> commandMessageEntity.getEnabled())
+                .stream().filter(commandMessageEntity -> Boolean.TRUE.equals(commandMessageEntity.getEnabled()))
                 .toList();
+
+        if (commandList == null || commandList.isEmpty()) {
+            return;
+        }
 
         final AtomicReference<HashMap<String, Object>> messageSendOptions = initializeMessageSendOptions(); // Final
 

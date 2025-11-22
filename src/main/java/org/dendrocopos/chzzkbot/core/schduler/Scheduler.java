@@ -11,7 +11,7 @@ import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class Scheduler {
 
     private final ChatMain chatMain;
