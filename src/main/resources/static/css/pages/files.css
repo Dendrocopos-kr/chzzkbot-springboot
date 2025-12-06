@@ -1,43 +1,87 @@
 /* =========================================================
- *  기본 레이아웃
+ * 공통 컨테이너 / 레이아웃
  * =======================================================*/
 .file-explorer-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 2rem 1rem;
 }
 
-/* 상단 툴바 (경로, 버튼, 개수 표시) */
+/* 상단 제목이 있다면 h1 스타일 (다른 페이지와 통일) */
+.file-explorer-container h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 설명 텍스트 */
+.file-explorer-container > p {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+ * 상단 툴바 (경로, 버튼, 개수 표시)
+ * =======================================================*/
 .file-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    font-size: 0.9rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.file-toolbar-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.file-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .file-toolbar .path-label {
     opacity: 0.7;
-    margin-right: 6px;
 }
 
 .file-toolbar .path-text {
     font-family: monospace;
     word-break: break-all;
-}
-
-.file-toolbar .actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    color: var(--text-primary);
 }
 
 /* 상단 버튼 (root / 상위 폴더 등) */
 .btn-back {
-    padding: 4px 10px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     text-decoration: none;
     font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-back:hover {
+    background: var(--pink-primary);
+    border-color: var(--pink-primary);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 /* 파일 개수 */
@@ -47,52 +91,108 @@
 }
 
 /* =========================================================
- *  테이블 래퍼
+ * 테이블 래퍼 (카드 박스처럼)
  * =======================================================*/
 .file-table-wrapper {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    overflow: hidden;      /* 👈 둥근 모서리 밖으로 내용/스크롤 안 나가게 */
+}
+
+.file-table-scroll {
     max-height: 70vh;
     overflow-y: auto;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 스크롤바 스타일은 여기로 이동 */
+.file-table-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.file-table-scroll::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.file-table-scroll::-webkit-scrollbar-thumb {
+    background: var(--border-color);
     border-radius: 4px;
 }
 
+.file-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 스크롤바 스타일 (다른 페이지와 비슷하게) */
+.file-table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.file-table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.file-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.file-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
 /* =========================================================
- *  테이블 및 공통 셀 스타일
+ * 테이블 및 공통 셀 스타일
  * =======================================================*/
 .file-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    background: var(--bg-secondary);
 }
 
 /* 헤더 고정 */
 .file-table thead {
     position: sticky;
     top: 0;
-    background: rgba(0, 0, 0, 0.7);
     z-index: 1;
 }
 
-/* 공통 셀 스타일 */
-.file-table th,
-.file-table td {
-    padding: 8px 16px; /* 상하 8px, 좌우 16px */
+/* 헤더 스타일 (commands / rules 톤에 맞춤) */
+.file-table th {
+    background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    color: #fff;
+    font-weight: 600;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     white-space: nowrap;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 공통 셀 스타일 */
+.file-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    white-space: nowrap;
 }
 
 /* 이름 컬럼 */
 .file-table .col-name {
-    width: 100%; /* 가장 넓게 */
+    width: 100%;
 }
 
 /* Row hover 효과 */
+.file-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
 .file-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-tertiary);
 }
 
 /* =========================================================
- *  파일/폴더 이름
+ * 파일/폴더 이름
  * =======================================================*/
 .file-name-text,
 .file-name-link {
@@ -102,39 +202,50 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     vertical-align: middle;
+    color: var(--text-primary);
+}
+
+.file-name-link {
+    text-decoration: none;
+}
+
+.file-name-link:hover {
+    text-decoration: underline;
 }
 
 /* 종류 아이콘 */
 .file-type-icon {
     width: 20px;
     text-align: center;
+    opacity: 0.85;
 }
 
 /* =========================================================
- *  섹션 구분 (폴더/파일)
+ * 섹션 구분 (폴더 / 파일)
  * =======================================================*/
 .section-row {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-primary);
     font-weight: 600;
+    color: var(--text-secondary);
 }
 
 .section-row td {
-    padding-top: 10px;
-    padding-bottom: 4px;
+    padding-top: 0.7rem;
+    padding-bottom: 0.4rem;
     font-size: 0.8rem;
     text-transform: uppercase;
-    opacity: 0.8;
+    letter-spacing: 0.04em;
 }
 
 /* 비어 있는 경우 안내 */
 .empty-row td {
-    padding: 20px 10px;
+    padding: 1.5rem 1rem;
     text-align: center;
-    opacity: 0.7;
+    color: var(--text-secondary);
 }
 
 /* =========================================================
- *  다운로드 / 보기 아이콘 영역
+ * 다운로드 / 보기 아이콘 영역
  * =======================================================*/
 
 /* 다운로드/보기 열 가운데 정렬 */
@@ -145,18 +256,79 @@
 
 /* 아이콘 간 간격 조절 */
 .file-table td.col-download a {
-    display: inline-block;
-    margin: 0 8px;      /* ★ 여기서 아이콘 간격 조절 */
-}
-
-/* 기본 링크 스타일 제거 */
-.btn-download,
-.btn-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 6px;
+    color: var(--text-secondary);
     text-decoration: none;
+    transition: color 0.2s ease, transform 0.1s ease;
 }
 
 /* 아이콘 크기 통일 */
 .file-table .btn-download i,
 .file-table .btn-view i {
     font-size: 1.1rem;
+}
+
+/* 호버 효과 */
+.file-table td.col-download a:hover {
+    color: var(--pink-primary);
+    transform: translateY(-1px);
+}
+
+/* 기본 링크 스타일 제거용 클래스 */
+.btn-download,
+.btn-view {
+    text-decoration: none;
+}
+
+/* 종류 아이콘 (셀 자체) */
+.file-type-icon {
+    width: 20px;
+    text-align: center;
+    opacity: 0.85;
+}
+
+/* 실제 아이콘 요소 */
+.file-type-icon-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    font-size: 1.1rem;
+}
+
+
+/* =========================================================
+ * 반응형
+ * =======================================================*/
+@media (max-width: 768px) {
+    .file-explorer-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .file-explorer-container h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .file-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .file-table-wrapper {
+        border-radius: 16px;
+    }
+
+    .file-table th,
+    .file-table td {
+        padding: 0.7rem 0.6rem;
+    }
+
+    .file-name-text,
+    .file-name-link {
+        max-width: 240px;
+    }
 }
