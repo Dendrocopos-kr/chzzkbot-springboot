@@ -34,6 +34,18 @@
     
     <!-- 페이지별 추가 CSS -->
     <th:block th:replace="${additionalCss}" />
+
+    <!-- hotwire turbo-->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@latest/dist/turbo.es2017-esm.min.js"></script>
+
+    <!-- 공통 스크립트 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" defer></script>
+
+    <!-- header 끝부분의 스크립트 섹션에 추가 -->
+    <script th:src="@{/js/theme.js}"></script>
+
+    <!-- 페이지별 추가 스크립트 -->
+    <th:block th:replace="${additionalScripts}" />
 </head>
 <body>
     <header th:replace="~{layout/fragments/header :: header}"></header>
@@ -43,14 +55,6 @@
     </main>
     
     <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
-    
-    <!-- 공통 스크립트 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" defer></script>
-    
-    <!-- 페이지별 추가 스크립트 -->
-    <th:block th:replace="${additionalScripts}" />
-    
-    <!-- body 끝부분의 스크립트 섹션에 추가 -->
-    <script th:src="@{/js/theme.js}"></script>
+
 </body>
 </html>

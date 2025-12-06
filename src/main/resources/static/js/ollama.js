@@ -1,8 +1,22 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("turbo:load", function () {
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
     const clearBtn = document.getElementById("clear-btn");
     const chatBox = document.getElementById("chat-box");
+
+    if( !userInput || !sendBtn || !clearBtn || !chatBox ) return;
+
+    if( userInput.dataset.init === "true") return;
+    userInput.dataset.init = "true";
+
+    if( sendBtn.dataset.init === "true") return;
+    sendBtn.dataset.init = "true";
+
+    if( clearBtn.dataset.init === "true") return;
+    clearBtn.dataset.init = "true";
+
+    if( chatBox.dataset.init === "true") return;
+    chatBox.dataset.init = "true";
 
     let isProcessing = false;
     let messageHistory = [];

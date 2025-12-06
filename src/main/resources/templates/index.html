@@ -39,13 +39,11 @@
 </main>
 
 <th:block th:fragment="additionalScripts">
-    <script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
-    <script th:src="@{/js/home.js}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/contrib/auto-render.min.js"></script>
-    <script th:src="@{/js/ollamaMessage.js}"></script>
-    <script th:src="@{/js/ollama.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/contrib/auto-render.min.js" defer></script>
+    <script th:src="@{/js/ollamaMessage.js}" defer></script>
+    <script th:src="@{/js/ollama.js}" defer></script>
 </th:block>
 </body>
 </html>

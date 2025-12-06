@@ -42,6 +42,6 @@ class ThemeManager {
 }
 
 // 페이지 로드 시 테마 매니저 초기화
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('turbo:load', () => {
     new ThemeManager();
 });

@@ -1,7 +1,18 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
     const searchInput = document.getElementById('commandSearch');
     const tableRows = document.querySelectorAll('.commands-table tbody tr');
     const noResults = document.getElementById('noResults');
+
+    if(!searchInput || !tableRows || !noResults) return;
+
+    if(searchInput.dataset.init === "true") return;
+    searchInput.dataset.init = "true";
+
+    if(noResults.dataset.init === "true") return;
+    noResults.dataset.init = "true";
+
+    if(tableRows.length === 0) return;
+
     let sortDirection = {};
 
     // 검색 기능 구현

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
     // FAQ 아코디언 기능
     const faqItems = document.querySelectorAll('.faq-item');
     
