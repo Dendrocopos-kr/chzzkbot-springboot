@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::additionalCss}, ~{::additionalScripts})}"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>뮤쪽이 - 파일 탐색기</title>
+    <th:block th:fragment="additionalCss">
+        <!-- 페이지 전용 CSS (필요 시) -->
+        <link rel="stylesheet" th:href="@{/css/pages/files.css}"/>
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="container file-explorer-container">
+        <h1 class="page-title">
+            <i class="fas fa-folder-open"></i> 파일 탐색기
+        </h1>
+
+        <!-- 상단 경로 / 상위 폴더 / 개수 표시 -->
+        <div class="file-toolbar">
+            <div>
+                <span class="path-label">현재 경로</span>
+                <span class="path-text" th:text="${currentPath}">/</span>
+            </div>
+            <div class="actions">
+                <!-- ★ 항상 보이는 ROOT 버튼 (루트가 아닐 때만 표시) -->
+                <a th:if="${!atRoot}"
+                   th:href="@{/files/view}"
+                   class="btn-back">
+                    <i class="fas fa-home"></i> root
+                </a>
+
+                <a th:if="${parentPath != null}"
+                   th:href="@{/files/view(path=${parentPath})}"
+                   class="btn-back">
+                    <i class="fas fa-level-up-alt"></i> 상위 폴더
+                </a>
+                <span class="file-count"
+                      th:text="|총 ${#lists.size(files)}개 항목|">
+                    총 0개 항목
+                </span>
+            </div>
+        </div>
+
+        <div class="file-table-wrapper">
+            <table class="file-table">
+                <thead>
+                <tr>
+                    <th class="file-type-icon">종류</th>
+                    <th class="col-name">이름</th>
+                    <th>크기</th>
+                    <th>수정일</th>
+                    <th class="col-download">다운로드</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <!-- 아무것도 없을 때 -->
+                <tr class="empty-row"
+                    th:if="${#lists.isEmpty(files)}">
+                    <td colspan="5">표시할 파일이 없습니다.</td>
+                </tr>
+
+                <!-- ===== 폴더 섹션 ===== -->
+                <tr class="section-row"
+                    th:if="${!#lists.isEmpty(files.?[directory])}">
+                    <td colspan="5">폴더</td>
+                </tr>
+
+                <tr th:each="file : ${files.?[directory]}">
+                    <td class="file-type-icon">
+                        <i class="fas fa-folder"></i>
+                    </td>
+                    <td class="col-name">
+                        <a class="file-name-link"
+                           th:href="@{/files/view(path=${file.fullPath})}"
+                           th:text="${file.name}">
+                            폴더명
+                        </a>
+                    </td>
+                    <td>-</td>
+                    <td th:text="${#dates.format(file.lastModified, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-01 00:00
+                    </td>
+                    <td></td>
+                </tr>
+
+                <!-- ===== 파일 섹션 ===== -->
+                <tr class="section-row"
+                    th:if="${!#lists.isEmpty(files.?[!directory])}">
+                    <td colspan="5">파일</td>
+                </tr>
+
+                <tr th:each="file : ${files.?[!directory]}">
+                    <td class="file-type-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </td>
+                    <td class="col-name">
+                        <span class="file-name-text"
+                              th:text="${file.name}">파일명</span>
+                    </td>
+                    <!-- 크기: 필요하면 formatInteger로 교체 -->
+                    <td th:text="${file.humanSize}">0</td>
+                    <td th:text="${#dates.format(file.lastModified, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-01 00:00
+                    </td>
+                    <td class="col-download">
+                        <a th:if="${!file.directory and (file.name.endsWith('.mp4') or file.name.endsWith('.mkv') or file.name.endsWith('.mp3'))}"
+                           th:href="@{/files/stream(path=${file.fullPath})}"
+                           class="btn-view"
+                           title="바로 보기"
+                           target="_blank">
+                            <i class="fas fa-play-circle"></i>
+                        </a>
+                        <a th:if="${!file.directory}"
+                           th:href="@{/files/download(path=${file.fullPath})}"
+                           class="btn-download col-download"
+                           title="다운로드">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="additionalScripts">
+    <!-- 나중에 멀티 선택 / ZIP 다운로드 스크립트 들어올 자리 -->
+</th:block>
+</body>
+</html>

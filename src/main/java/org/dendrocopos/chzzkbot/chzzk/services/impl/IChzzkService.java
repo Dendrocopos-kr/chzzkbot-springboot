@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.chzzk.chatservice.impl;
+package org.dendrocopos.chzzkbot.chzzk.services.impl;
 
 import reactor.core.publisher.Mono;
 

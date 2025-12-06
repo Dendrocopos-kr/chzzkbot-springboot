@@ -6,6 +6,7 @@
             <a href="/" class="logo">뮤쪽이</a>
             <ul class="nav-links">
                 <li><a th:href="@{/}" th:class="${currentPage == 'home'} ? 'active' : ''">홈</a></li>
+                <li><a th:href="@{/files/view}" th:class="${currentPage == 'vod'} ? 'active' : ''">VOD</a></li>
                 <li><a th:href="@{/commands}" th:class="${currentPage == 'commands'} ? 'active' : ''">명령어</a></li>
                 <li><a th:href="@{/rules}" th:class="${currentPage == 'rules'} ? 'active' : ''">규칙</a></li>
                 <li><a th:href="@{/about}" th:class="${currentPage == 'about'} ? 'active' : ''">소개</a></li>

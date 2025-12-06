@@ -3,14 +3,13 @@ package org.dendrocopos.chzzkbot.chzzk.main;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
-import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatenum.ChatCommand;
-import org.dendrocopos.chzzkbot.chzzk.chatservice.ChzzkServices;
-import org.dendrocopos.chzzkbot.chzzk.chatservice.MessageService;
+import org.dendrocopos.chzzkbot.chzzk.entity.CommandMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.enums.ChatCommand;
+import org.dendrocopos.chzzkbot.chzzk.services.ChzzkServices;
+import org.dendrocopos.chzzkbot.chzzk.services.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.dendrocopos.chzzkbot.core.utils.StringUtils;
@@ -36,12 +35,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static org.dendrocopos.chzzkbot.chzzk.utils.Constants.*;
 import static org.dendrocopos.chzzkbot.chzzk.utils.EntityUtils.*;
 import static org.dendrocopos.chzzkbot.core.utils.StringUtils.appendTimeUnit;
-import static org.dendrocopos.chzzkbot.ollama.utils.Constants.*;
 
 @Slf4j
 @Component

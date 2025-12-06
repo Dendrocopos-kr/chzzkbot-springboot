@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.chzzk.chatentity;
+package org.dendrocopos.chzzkbot.chzzk.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

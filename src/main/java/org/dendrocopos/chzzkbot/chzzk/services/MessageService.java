@@ -1,9 +1,9 @@
-package org.dendrocopos.chzzkbot.chzzk.chatservice;
+package org.dendrocopos.chzzkbot.chzzk.services;
 
 import lombok.RequiredArgsConstructor;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.DonationMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.NormalMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatservice.impl.IMessageService;
+import org.dendrocopos.chzzkbot.chzzk.entity.DonationMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.entity.NormalMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.services.impl.IMessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
 import org.springframework.stereotype.Service;

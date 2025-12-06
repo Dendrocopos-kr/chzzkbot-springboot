@@ -17,4 +17,5 @@ public class PublicController {
     public String showRulesPage() {
         return "/common/rules";
     }
+
 }

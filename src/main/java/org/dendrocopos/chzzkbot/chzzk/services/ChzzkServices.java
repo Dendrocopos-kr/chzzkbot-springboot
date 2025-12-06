@@ -1,7 +1,7 @@
-package org.dendrocopos.chzzkbot.chzzk.chatservice;
+package org.dendrocopos.chzzkbot.chzzk.services;
 
 import lombok.RequiredArgsConstructor;
-import org.dendrocopos.chzzkbot.chzzk.chatservice.impl.IChzzkService;
+import org.dendrocopos.chzzkbot.chzzk.services.impl.IChzzkService;
 import org.dendrocopos.chzzkbot.chzzk.nid.nid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

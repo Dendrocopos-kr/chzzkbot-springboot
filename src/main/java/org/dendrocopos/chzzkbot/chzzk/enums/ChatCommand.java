@@ -1,4 +1,4 @@
-package org.dendrocopos.chzzkbot.chzzk.chatenum;
+package org.dendrocopos.chzzkbot.chzzk.enums;
 
 import lombok.Getter;
 

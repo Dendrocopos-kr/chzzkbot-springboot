@@ -2,7 +2,7 @@ package org.dendrocopos.chzzkbot.front.controller.permitAll;
 
 
 import lombok.RequiredArgsConstructor;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.CommandMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.entity.CommandMessageEntity;
 import org.dendrocopos.chzzkbot.chzzk.repository.CommandMessageRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

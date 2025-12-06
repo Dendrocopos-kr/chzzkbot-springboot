@@ -47,7 +47,7 @@ spring:
 server:
   port: 8180
 security:
-  allowed-uris: /,/css/**,/js/**,/img/**,/api/**,/commands/**,/about/**,/contact/**,/ollama/**,/rules/**
+  allowed-uris: /,/css/**,/js/**,/img/**,/api/**,/commands/**,/about/**,/contact/**,/ollama/**,/rules/**,/files/**,/test/**,/gis_layer/**
   authenticated-uris: /user/**
   admin-uris: /admin/**
 logging:
@@ -84,3 +84,15 @@ ollama:
   callCommand: 뮤쪽아!
   model: "myuzzoki:latest"
   baseURL: http://127.0.0.1:11434
+app:
+  file:
+    base-path:
+      - D:\편집본
+      - F:\VOD\2024
+      - E:\소스\VOD\2025
+      - E:\소스\VOD\clip
+    display-name: # ★ 추가
+      - 편집영상
+      - "2024"
+      - "2025"
+      - Clip

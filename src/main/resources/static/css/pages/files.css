@@ -1,0 +1,162 @@
+/* =========================================================
+ *  기본 레이아웃
+ * =======================================================*/
+.file-explorer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 상단 툴바 (경로, 버튼, 개수 표시) */
+.file-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.file-toolbar .path-label {
+    opacity: 0.7;
+    margin-right: 6px;
+}
+
+.file-toolbar .path-text {
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.file-toolbar .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 상단 버튼 (root / 상위 폴더 등) */
+.btn-back {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+/* 파일 개수 */
+.file-count {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* =========================================================
+ *  테이블 래퍼
+ * =======================================================*/
+.file-table-wrapper {
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* =========================================================
+ *  테이블 및 공통 셀 스타일
+ * =======================================================*/
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+/* 헤더 고정 */
+.file-table thead {
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+/* 공통 셀 스타일 */
+.file-table th,
+.file-table td {
+    padding: 8px 16px; /* 상하 8px, 좌우 16px */
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 이름 컬럼 */
+.file-table .col-name {
+    width: 100%; /* 가장 넓게 */
+}
+
+/* Row hover 효과 */
+.file-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================================
+ *  파일/폴더 이름
+ * =======================================================*/
+.file-name-text,
+.file-name-link {
+    display: inline-block;
+    max-width: 700px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* 종류 아이콘 */
+.file-type-icon {
+    width: 20px;
+    text-align: center;
+}
+
+/* =========================================================
+ *  섹션 구분 (폴더/파일)
+ * =======================================================*/
+.section-row {
+    background: rgba(255, 255, 255, 0.03);
+    font-weight: 600;
+}
+
+.section-row td {
+    padding-top: 10px;
+    padding-bottom: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+/* 비어 있는 경우 안내 */
+.empty-row td {
+    padding: 20px 10px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* =========================================================
+ *  다운로드 / 보기 아이콘 영역
+ * =======================================================*/
+
+/* 다운로드/보기 열 가운데 정렬 */
+.file-table th.col-download,
+.file-table td.col-download {
+    text-align: center;
+}
+
+/* 아이콘 간 간격 조절 */
+.file-table td.col-download a {
+    display: inline-block;
+    margin: 0 8px;      /* ★ 여기서 아이콘 간격 조절 */
+}
+
+/* 기본 링크 스타일 제거 */
+.btn-download,
+.btn-view {
+    text-decoration: none;
+}
+
+/* 아이콘 크기 통일 */
+.file-table .btn-download i,
+.file-table .btn-view i {
+    font-size: 1.1rem;
+}

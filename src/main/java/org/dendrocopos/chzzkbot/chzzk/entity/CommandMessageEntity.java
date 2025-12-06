@@ -1,10 +1,9 @@
-package org.dendrocopos.chzzkbot.chzzk.chatentity;
+package org.dendrocopos.chzzkbot.chzzk.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Getter

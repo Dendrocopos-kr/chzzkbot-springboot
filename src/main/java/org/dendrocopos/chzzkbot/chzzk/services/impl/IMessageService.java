@@ -1,7 +1,7 @@
-package org.dendrocopos.chzzkbot.chzzk.chatservice.impl;
+package org.dendrocopos.chzzkbot.chzzk.services.impl;
 
-import org.dendrocopos.chzzkbot.chzzk.chatentity.DonationMessageEntity;
-import org.dendrocopos.chzzkbot.chzzk.chatentity.NormalMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.entity.DonationMessageEntity;
+import org.dendrocopos.chzzkbot.chzzk.entity.NormalMessageEntity;
 
 import java.util.Map;
 

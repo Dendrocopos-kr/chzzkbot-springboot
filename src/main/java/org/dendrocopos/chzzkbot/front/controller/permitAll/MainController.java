@@ -30,4 +30,14 @@ public class MainController {
         model.addAttribute("currentPage", "rules");
         return "common/rules";
     }
+
+    @GetMapping(value = "/test")
+    public String testPage() {
+        return "test/html_new/stat_public_251029";
+    }
+
+    @GetMapping(value = "/gis_layer")
+    public String gisLayer() {
+        return "test/html_new/gis_layer";
+    }
 }
