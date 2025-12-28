@@ -298,37 +298,136 @@
     width: 20px;
     font-size: 1.1rem;
 }
+/* 정렬 아이콘 */
+.sort-icon {
+    margin-left: 6px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    cursor: pointer;
+}
 
+th[data-sort] {
+    cursor: pointer;
+    user-select: none;
+}
+
+th[data-sort].asc .sort-icon::before {
+    content: "\f0de"; /* fa-sort-up */
+}
+
+th[data-sort].desc .sort-icon::before {
+    content: "\f0dd"; /* fa-sort-down */
+}
 
 /* =========================================================
  * 반응형
  * =======================================================*/
 @media (max-width: 768px) {
-    .file-explorer-container {
-        padding: 1.5rem 1rem;
+    /* 1) 기본 레이아웃 */
+    .file-explorer-container { padding: 1.25rem 0.75rem; }
+    .file-toolbar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+
+    /* ✅ 이중 스크롤 제거 */
+    .file-table-scroll { max-height: none; overflow-y: visible; }
+
+    /* 2) 테이블: 고정 레이아웃로 컬럼 폭 강제 */
+    .file-table {
+        table-layout: fixed;
+        width: 100%;
     }
 
-    .file-explorer-container h1 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .file-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .file-table-wrapper {
-        border-radius: 16px;
-    }
-
+    /* 셀 패딩/폰트 줄여서 폭 확보 */
     .file-table th,
     .file-table td {
-        padding: 0.7rem 0.6rem;
+        padding: 0.55rem 0.5rem;
+        font-size: 0.88rem;
+        white-space: nowrap;   /* 기본은 줄바꿈 금지(겹침 방지) */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* 3) 컬럼 구성 (모바일에서는: 종류 / 이름 / 수정일 / 다운로드) */
+    /* 크기(3번째) 숨김 */
+    /*.file-table th:nth-child(3),
+    .file-table td:nth-child(3) { display: none; }*/
+
+    /* 종류(1) */
+    .file-table th.file-type-icon,
+    .file-table td.file-type-icon {
+        width: 38px;
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+        text-align: center;
+    }
+
+    /* 이름(2) : 남는 공간 */
+    .file-table th:nth-child(2),
+    .file-table td:nth-child(2) {
+        width: auto;
+        min-width: 0; /* ellipsis 필수 */
+    }
+
+    /* 수정일(4) : 고정폭 */
+    .file-table th:nth-child(4),
+    .file-table td:nth-child(4) {
+        width: 92px;            /* 겹치면 여기 100~110으로 늘리면 됨 */
+        text-align: center;
+        font-size: 0.82rem;
+    }
+
+    /* 다운로드(5) : 고정폭 + 아이콘 중앙 */
+    .file-table th.col-download,
+    .file-table td.col-download {
+        width: 64px;            /* 겹치면 70~80으로 늘리면 됨 */
+        text-align: center;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    /* ✅ 다운로드 아이콘이 셀 밖으로 못 튀어나오게 */
+    .file-table td.col-download {
+        overflow: hidden;
+    }
+
+    /* 다운로드/보기 아이콘 간격 축소 (겹침 방지) */
+    .file-table td.col-download a {
+        margin: 0 4px;
+    }
+    .file-table .btn-download i,
+    .file-table .btn-view i {
+        font-size: 1.0rem;
+    }
+
+    /* 4) 파일명: 기본은 1줄 말줄임 */
     .file-name-text,
     .file-name-link {
-        max-width: 240px;
+        display: block;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* 5) 선택(active) 시: “테이블은 유지” + 파일명만 아래 미리보기(별도 row) */
+    tr.filename-preview td {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        padding: 0.6rem 0.75rem;
+        background: rgba(255,255,255,0.04);
+    }
+    .filename-preview-box {
+        line-height: 1.35;
+        word-break: break-word;
+        font-size: 0.9rem;
+    }
+
+    /* 6) 모바일 헤더 깨짐 방지: 헤더를 한 덩어리 bar로 */
+    .file-table thead tr {
+        background: linear-gradient(135deg, var(--pink-primary), var(--pink-light));
+    }
+    .file-table thead th {
+        background: transparent;
     }
 }

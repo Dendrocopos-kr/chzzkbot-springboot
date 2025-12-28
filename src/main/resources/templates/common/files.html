@@ -47,10 +47,11 @@
                     <thead>
                     <tr>
                         <th class="file-type-icon">종류</th>
-                        <th class="col-name">이름</th>
-                        <th>크기</th>
-                        <th>수정일</th>
-                        <th class="col-download">다운로드</th>
+                        <th class="th-name" data-sort="name">이름 <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="th-size" data-sort="size">크기 <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="th-modified" data-sort="modified">수정일 <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="col-download th-download">다운로드</th>
+
                     </tr>
                     </thead>
                     <tbody>
@@ -67,23 +68,20 @@
                         <td colspan="5">폴더</td>
                     </tr>
 
-                    <tr th:each="file : ${files.?[directory]}">
+                    <tr th:attr="data-name=${file.name} ,data-size=0 ,data-modified=${file.lastModified != null ? file.lastModified.toEpochMilli() : 0}" th:each="file : ${files.?[directory]}">
                         <td class="file-type-icon">
                             <i class="fas fa-folder"></i>
                         </td>
                         <td class="col-name">
-                            <a class="file-name-link"
-                               th:href="@{/files/view(path=${file.fullPath})}"
-                               th:text="${file.name}">
+                            <a class="file-name-link" th:href="@{/files/view(path=${file.fullPath})}" th:text="${file.name}">
                                 폴더명
                             </a>
                         </td>
                         <td>-</td>
-                        <td th:text="${#dates.format(file.lastModified, 'yyyy-MM-dd HH:mm')}">
-                            2024-01-01 00:00
-                        </td>
+                        <td th:text="${file.lastModified != null ? #temporals.format(file.lastModified, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
                         <td></td>
                     </tr>
+
 
                     <!-- ===== 파일 섹션 ===== -->
                     <tr class="section-row"
@@ -91,36 +89,45 @@
                         <td colspan="5">파일</td>
                     </tr>
 
-                    <tr th:each="file : ${files.?[!directory]}">
+                    <tr th:attr="
+                          data-name=${file.name},
+                          data-size=${file.size},
+                          data-modified=${file.lastModified != null ? file.lastModified.toEpochMilli() : 0},
+                          data-fullname=${file.name}
+                        "
+                        th:each="file : ${files.?[!directory]}">
                         <td class="file-type-icon">
-                        <span class="file-type-icon-inner"
-                              th:attr="data-filename=${file.name}"></span>
+                            <span class="file-type-icon-inner" th:attr="data-filename=${file.name}"></span>
                         </td>
+
                         <td class="col-name">
-                        <span class="file-name-text"
-                              th:text="${file.name}">파일명</span>
+                            <span class="file-name-text" th:attr="title=${file.name}" th:text="${file.name}">파일명</span>
                         </td>
-                        <!-- 크기: 필요하면 formatInteger로 교체 -->
+
                         <td th:text="${file.humanSize}">0</td>
-                        <td th:text="${#dates.format(file.lastModified, 'yyyy-MM-dd HH:mm')}">
-                            2024-01-01 00:00
-                        </td>
+
+                        <td class="td-modified"
+                            th:text="${file.lastModified != null ? #temporals.format(file.lastModified, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+
+
+
                         <td class="col-download">
                             <a class="btn-view"
                                target="_blank"
-                               th:href="@{/files/stream(path=${file.fullPath})}"
-                               th:if="${!file.directory and (file.name.endsWith('.mp4') or file.name.endsWith('.mkv') or file.name.endsWith('.mp3'))}"
+                               th:href="@{/files/watch(path=${file.fullPath})}"
+                               th:if="${file.name.endsWith('.mp4')}"
                                title="바로 보기">
                                 <i class="fas fa-play-circle"></i>
                             </a>
-                            <a class="btn-download col-download"
+
+                            <a class="btn-download"
                                th:href="@{/files/download(path=${file.fullPath})}"
-                               th:if="${!file.directory}"
                                title="다운로드">
                                 <i class="fas fa-download"></i>
                             </a>
                         </td>
                     </tr>
+
 
                     </tbody>
                 </table>

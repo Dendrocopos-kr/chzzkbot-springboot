@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -33,6 +34,13 @@ public class FileController {
 
     private final FileService fileService;
     private final FileStorageProperties fileStorageProperties;
+
+    @GetMapping("/watch")
+    public String watch(@RequestParam("path") String path, Model model) {
+        String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        model.addAttribute("path", decodedPath);
+        return "common/video-view"; // templates/video-view.html
+    }
 
     /**
      * 파일 탐색기 화면 렌더링
@@ -102,13 +110,15 @@ public class FileController {
 
 
     @GetMapping("/stream")
-    public ResponseEntity<ResourceRegion> stream(
+    @ResponseBody
+    public ResponseEntity<StreamingResponseBody> stream(
             @RequestParam("path") String path,
             @RequestHeader HttpHeaders headers,
-            HttpServletRequest request) throws IOException {
+            HttpServletRequest request
+    ) throws IOException {
 
         String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
-        String clientIp = extractClientIp(request);   // 이미 다운로드쪽에서 쓰던 거 재사용
+        String clientIp = extractClientIp(request);
 
         return fileService.streamFile(decodedPath, headers, clientIp);
     }

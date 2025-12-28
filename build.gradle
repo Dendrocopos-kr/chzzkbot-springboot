@@ -48,7 +48,7 @@ dependencies {
     implementation 'org.jboss.logging:jboss-logging:3.5.0.Final'   // Hibernate 내부의 로깅 클래스 의존성
     implementation 'org.hibernate.common:hibernate-commons-annotations:6.0.6.Final' // Hibernate ReflectionManager 제공
 
-    implementation 'org.liquibase:liquibase-core'
+    //implementation 'org.liquibase:liquibase-core'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     implementation 'org.postgresql:postgresql'

@@ -23,12 +23,16 @@ public class CommandMessageEntity {
 
     private boolean nickNameUse;
 
+    @Builder.Default
     private Long cooldown = 5000L;
 
+    @Builder.Default
     private LocalDateTime lastCommandTime = LocalDateTime.now();
 
+    @Builder.Default
     private Long counting = 0L;
 
+    @Builder.Default
     private Boolean enabled = true;
 
     @PrePersist

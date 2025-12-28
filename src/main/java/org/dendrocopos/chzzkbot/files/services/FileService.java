@@ -15,6 +15,7 @@ import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -216,50 +217,94 @@ public class FileService {
         }
     }
 
-    public ResponseEntity<ResourceRegion> streamFile(String logicalPath, HttpHeaders requestHeaders,String clientIp) throws IOException {
+    public ResponseEntity<StreamingResponseBody> streamFile(String logicalPath, HttpHeaders requestHeaders, String clientIp) throws IOException {
         Path physicalPath = resolvePath(logicalPath);
 
-        if (!Files.exists(physicalPath) || Files.isDirectory(physicalPath)) {
-            saveLog(physicalPath, clientIp, false, DownloadType.STREAM); // 실패도 STREAM 타입으로 남김
+        if (physicalPath == null || !Files.exists(physicalPath) || Files.isDirectory(physicalPath)) {
+            saveLog(physicalPath != null ? physicalPath : Paths.get(""), clientIp, false, DownloadType.STREAM);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일이 존재하지 않습니다.");
         }
 
-        Resource resource = new PathResource(physicalPath);
-        long contentLength = resource.contentLength();
+        long fileSize = Files.size(physicalPath);
 
+        // mimeType (probe 실패 시 mp4로 폴백)
         String mimeType = Files.probeContentType(physicalPath);
-        MediaType mediaType = (mimeType != null)
-                ? MediaType.parseMediaType(mimeType)
-                : MediaType.APPLICATION_OCTET_STREAM;
+        MediaType mediaType = (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.valueOf("video/mp4");
 
-        List<HttpRange> ranges = requestHeaders.getRange();
-        ResourceRegion region;
+        // Range 파싱
+        String rangeHeader = requestHeaders.getFirst(HttpHeaders.RANGE);
 
-        // ★ Range 헤더 없는 요청 = "첫 요청"으로 간주 → 이때만 STREAM 로그 기록
-        if (ranges == null || ranges.isEmpty()) {
-            saveLog(physicalPath, clientIp, true, DownloadType.STREAM);
+        long start = 0;
+        long end = fileSize - 1;
 
-            long chunkSize = Math.min(1 * 1024 * 1024, contentLength); // 1MB
-            region = new ResourceRegion(resource, 0, chunkSize);
-        } else {
-            HttpRange range = ranges.get(0);
-            long start = range.getRangeStart(contentLength);
-            long end = range.getRangeEnd(contentLength);
-            long rangeLength = Math.min(1 * 1024 * 1024, end - start + 1);
+        if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
+            // 예: bytes=0- , bytes=100-200
+            String[] parts = rangeHeader.substring("bytes=".length()).split("-", 2);
 
-            region = new ResourceRegion(resource, start, rangeLength);
-            // ★ 여기서는 추가 로그 X (같은 세션 내 이어보기로 간주)
+            try {
+                if (!parts[0].isBlank()) start = Long.parseLong(parts[0]);
+                if (parts.length > 1 && !parts[1].isBlank()) end = Long.parseLong(parts[1]);
+            } catch (NumberFormatException ignore) {
+                // 잘못된 Range면 416
+                HttpHeaders h = new HttpHeaders();
+                h.set(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
+                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).headers(h).body(outputStream -> {});
+            }
+
+            // 범위 보정/검증
+            if (start < 0 || start >= fileSize || end < start) {
+                HttpHeaders h = new HttpHeaders();
+                h.set(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
+                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).headers(h).body(outputStream -> {});
+            }
+            if (end >= fileSize) end = fileSize - 1;
         }
+
+        long contentLength = end - start + 1;
+
+        // STREAM 로그는 "첫 요청(=Range 없음)"일 때만 찍던 기존 정책 유지
+        if (rangeHeader == null) {
+            saveLog(physicalPath, clientIp, true, DownloadType.STREAM);
+        }
+
+        StreamingResponseBody body = getStreamingResponseBody(start, end, physicalPath);
 
         HttpHeaders respHeaders = new HttpHeaders();
         respHeaders.setContentType(mediaType);
-        respHeaders.set("Accept-Ranges", "bytes");
+        respHeaders.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+        respHeaders.setContentLength(contentLength);
 
-        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .headers(respHeaders)
-                .body(region);
+        // Range 요청이면 206 + Content-Range
+        if (rangeHeader != null) {
+            respHeaders.set(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize);
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).headers(respHeaders).body(body);
+        }
+
+        // Range 없으면 200
+        return ResponseEntity.ok().headers(respHeaders).body(body);
     }
 
+    private static StreamingResponseBody getStreamingResponseBody(long start, long end, Path physicalPath) {
+        final long fStart = start;
+        final long fEnd = end;
+
+        StreamingResponseBody body = outputStream -> {
+            try (RandomAccessFile raf = new RandomAccessFile(physicalPath.toFile(), "r")) {
+                raf.seek(fStart);
+
+                byte[] buffer = new byte[8192];
+                long remaining = (fEnd - fStart) + 1;
+
+                while (remaining > 0) {
+                    int read = raf.read(buffer, 0, (int) Math.min(buffer.length, remaining));
+                    if (read == -1) break;
+                    outputStream.write(buffer, 0, read);
+                    remaining -= read;
+                }
+            }
+        };
+        return body;
+    }
 
     public void downloadAsZip(List<String> encodedPaths, String clientIp,
                               HttpServletResponse response) throws IOException {

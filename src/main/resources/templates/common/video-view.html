@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+<video
+        controls
+        playsinline
+        webkit-playsinline
+        preload="metadata"
+        disablepictureinpicture
+        controlsList="nodownload"
+>
+    <source
+            th:src="@{/files/stream(path=${path})}"
+            type="video/mp4"
+    />
+</video>
+
+</body>
+</html>
