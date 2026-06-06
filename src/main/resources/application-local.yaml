@@ -25,14 +25,14 @@ spring:
     user:
       name: guribot
       password: guribot
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
-    driver-class-name: ${spring.datasource.driver-class-name}
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    clear-checksums: false
+#  liquibase:
+#    enabled: true
+#    change-log: classpath:db/changelog/db.changelog-master.yaml
+#    driver-class-name: ${spring.datasource.driver-class-name}
+#    url: ${spring.datasource.url}
+#    user: ${spring.datasource.username}
+#    password: ${spring.datasource.password}
+#    clear-checksums: false
   data:
     redis:
       host: localhost  # Docker Compose의 redis 서비스 이름
@@ -88,11 +88,13 @@ app:
   file:
     base-path:
       - D:\편집본
-      - F:\VOD\2024
-      - E:\소스\VOD\2025
-      - E:\소스\VOD\clip
+      - D:\clip
+      - F:\2024
+      - E:\2025
+      - G:\2026
     display-name: # ★ 추가
       - 편집영상
+      - Clip
       - "2024"
       - "2025"
-      - Clip
+      - "2026"

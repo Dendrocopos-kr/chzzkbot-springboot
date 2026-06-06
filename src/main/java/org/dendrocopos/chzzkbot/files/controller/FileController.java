@@ -110,17 +110,17 @@ public class FileController {
 
 
     @GetMapping("/stream")
-    @ResponseBody
-    public ResponseEntity<StreamingResponseBody> stream(
+    public void stream(
             @RequestParam("path") String path,
             @RequestHeader HttpHeaders headers,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) throws IOException {
 
         String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
         String clientIp = extractClientIp(request);
 
-        return fileService.streamFile(decodedPath, headers, clientIp);
+        fileService.streamFile(decodedPath, headers, clientIp, response);
     }
 
 

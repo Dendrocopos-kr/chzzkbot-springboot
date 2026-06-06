@@ -25,14 +25,14 @@ spring:
     user:
       name: guribot
       password: guribot
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
-    driver-class-name: ${spring.datasource.driver-class-name}
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    clear-checksums: false
+#  liquibase:
+#    enabled: true
+#    change-log: classpath:db/changelog/db.changelog-master.yaml
+#    driver-class-name: ${spring.datasource.driver-class-name}
+#    url: ${spring.datasource.url}
+#    user: ${spring.datasource.username}
+#    password: ${spring.datasource.password}
+#    clear-checksums: false
 server:
   port: 8180
 security:

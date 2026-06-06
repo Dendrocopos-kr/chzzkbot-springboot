@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -217,94 +218,108 @@ public class FileService {
         }
     }
 
-    public ResponseEntity<StreamingResponseBody> streamFile(String logicalPath, HttpHeaders requestHeaders, String clientIp) throws IOException {
+    public void streamFile(String logicalPath, HttpHeaders requestHeaders, String clientIp, HttpServletResponse response) throws IOException {
         Path physicalPath = resolvePath(logicalPath);
 
         if (physicalPath == null || !Files.exists(physicalPath) || Files.isDirectory(physicalPath)) {
             saveLog(physicalPath != null ? physicalPath : Paths.get(""), clientIp, false, DownloadType.STREAM);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일이 존재하지 않습니다.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
 
         long fileSize = Files.size(physicalPath);
 
-        // mimeType (probe 실패 시 mp4로 폴백)
         String mimeType = Files.probeContentType(physicalPath);
-        MediaType mediaType = (mimeType != null) ? MediaType.parseMediaType(mimeType) : MediaType.valueOf("video/mp4");
+        String contentType = (mimeType != null) ? mimeType : "video/mp4";
 
-        // Range 파싱
         String rangeHeader = requestHeaders.getFirst(HttpHeaders.RANGE);
 
-        long start = 0;
-        long end = fileSize - 1;
-
-        if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
-            // 예: bytes=0- , bytes=100-200
-            String[] parts = rangeHeader.substring("bytes=".length()).split("-", 2);
-
-            try {
-                if (!parts[0].isBlank()) start = Long.parseLong(parts[0]);
-                if (parts.length > 1 && !parts[1].isBlank()) end = Long.parseLong(parts[1]);
-            } catch (NumberFormatException ignore) {
-                // 잘못된 Range면 416
-                HttpHeaders h = new HttpHeaders();
-                h.set(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
-                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).headers(h).body(outputStream -> {});
-            }
-
-            // 범위 보정/검증
-            if (start < 0 || start >= fileSize || end < start) {
-                HttpHeaders h = new HttpHeaders();
-                h.set(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
-                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).headers(h).body(outputStream -> {});
-            }
-            if (end >= fileSize) end = fileSize - 1;
-        }
-
-        long contentLength = end - start + 1;
-
-        // STREAM 로그는 "첫 요청(=Range 없음)"일 때만 찍던 기존 정책 유지
+        // STREAM 로그: 기존 정책 유지(최초 요청 Range 없음일 때만)
         if (rangeHeader == null) {
             saveLog(physicalPath, clientIp, true, DownloadType.STREAM);
         }
 
-        StreamingResponseBody body = getStreamingResponseBody(start, end, physicalPath);
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+        response.setContentType(contentType);
 
-        HttpHeaders respHeaders = new HttpHeaders();
-        respHeaders.setContentType(mediaType);
-        respHeaders.set(HttpHeaders.ACCEPT_RANGES, "bytes");
-        respHeaders.setContentLength(contentLength);
+        long start = 0;
+        long end = fileSize - 1;
 
-        // Range 요청이면 206 + Content-Range
-        if (rangeHeader != null) {
-            respHeaders.set(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize);
-            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).headers(respHeaders).body(body);
+        if (rangeHeader == null || rangeHeader.isBlank()) {
+            // 200 OK 전체
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileSize));
+
+            try (InputStream is = Files.newInputStream(physicalPath);
+                 OutputStream os = response.getOutputStream()) {
+                StreamUtils.copy(is, os);
+                os.flush();
+            }
+            return;
         }
 
-        // Range 없으면 200
-        return ResponseEntity.ok().headers(respHeaders).body(body);
-    }
+        // 단일 Range 파싱: bytes=start-end / bytes=start- / bytes=-suffix
+        // (대부분 플레이어는 단일 Range 사용)
+        String range = rangeHeader.trim();
+        if (!range.startsWith("bytes=")) {
+            response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
+            return;
+        }
 
-    private static StreamingResponseBody getStreamingResponseBody(long start, long end, Path physicalPath) {
-        final long fStart = start;
-        final long fEnd = end;
+        String spec = range.substring("bytes=".length());
+        String[] parts = spec.split("-", 2);
 
-        StreamingResponseBody body = outputStream -> {
-            try (RandomAccessFile raf = new RandomAccessFile(physicalPath.toFile(), "r")) {
-                raf.seek(fStart);
-
-                byte[] buffer = new byte[8192];
-                long remaining = (fEnd - fStart) + 1;
-
-                while (remaining > 0) {
-                    int read = raf.read(buffer, 0, (int) Math.min(buffer.length, remaining));
-                    if (read == -1) break;
-                    outputStream.write(buffer, 0, read);
-                    remaining -= read;
-                }
+        try {
+            if (parts.length == 2 && parts[0].isEmpty()) {
+                // bytes=-suffix
+                long suffix = Long.parseLong(parts[1]);
+                if (suffix <= 0) throw new NumberFormatException();
+                start = Math.max(0, fileSize - suffix);
+                end = fileSize - 1;
+            } else {
+                // bytes=start-end or bytes=start-
+                start = Long.parseLong(parts[0]);
+                end = (parts.length == 2 && !parts[1].isEmpty()) ? Long.parseLong(parts[1]) : (fileSize - 1);
             }
-        };
-        return body;
+        } catch (NumberFormatException ex) {
+            response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
+            return;
+        }
+
+        // 검증/보정
+        if (start < 0 || start >= fileSize || end < start) {
+            response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + fileSize);
+            return;
+        }
+        if (end >= fileSize) end = fileSize - 1;
+
+        long contentLength = (end - start) + 1;
+
+        // 206 Partial Content
+        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize);
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+
+        try (InputStream is = Files.newInputStream(physicalPath);
+             OutputStream os = response.getOutputStream()) {
+
+            // InputStream에서 start까지 skip (큰 파일이면 반복 skip 필요)
+            long toSkip = start;
+            while (toSkip > 0) {
+                long skipped = is.skip(toSkip);
+                if (skipped <= 0) break;
+                toSkip -= skipped;
+            }
+
+            StreamUtils.copyRange(is, os, 0, contentLength - 1);
+            os.flush();
+        }
     }
+
+
 
     public void downloadAsZip(List<String> encodedPaths, String clientIp,
                               HttpServletResponse response) throws IOException {

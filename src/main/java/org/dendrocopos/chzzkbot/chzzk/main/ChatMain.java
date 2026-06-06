@@ -12,6 +12,7 @@ import org.dendrocopos.chzzkbot.chzzk.services.ChzzkServices;
 import org.dendrocopos.chzzkbot.chzzk.services.MessageService;
 import org.dendrocopos.chzzkbot.chzzk.repository.DonationMessageRepository;
 import org.dendrocopos.chzzkbot.chzzk.repository.NormalMessageRepository;
+import org.dendrocopos.chzzkbot.chzzk.services.UrlOpenService;
 import org.dendrocopos.chzzkbot.core.utils.StringUtils;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaMessage;
 import org.dendrocopos.chzzkbot.ollama.config.OllamaRequest;
@@ -53,6 +54,7 @@ public class ChatMain {
     private final NormalMessageRepository normalMessageRepository;
     private final DonationMessageRepository donationMessageRepository;
     private final OllamaClient ollamaClient;
+    private final UrlOpenService urlOpenService;
 
     @Getter
     public LinkedTreeMap channelInfoDetail;
@@ -313,7 +315,7 @@ public class ChatMain {
                             getReceivedMessageFlux(session)
                     ).doOnCancel(() -> {
                         // this block will be executed when the subscription is cancelled
-                        sendMessageToUser(session, closingMessage, initializeMessageSendOptions());
+                        // sendMessageToUser(session, closingMessage, initializeMessageSendOptions());
                         isWebSocketOpen = false;
                     }).then();
                 }
@@ -388,8 +390,10 @@ public class ChatMain {
                     // WebSocket 메시지 전송
                     session.send(Mono.just(session.textMessage(gson.toJson(openWebSocketJson))));
 
-                    // 사용자에게 안내 메시지 전송
-                    sendMessageToUser(session, announcementMessage, initializeMessageSendOptions());
+                    // 뮤쪽이 인사 메시지 전송
+                    // sendMessageToUser(session, announcementMessage, initializeMessageSendOptions());
+
+                    urlOpenService.open("https://chzzk.naver.com/live/"+channelInfo.get("channelId"));
                     break;
 
                 case CHAT:
